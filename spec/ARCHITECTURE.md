@@ -84,7 +84,7 @@ A long-running OTP application inside a Docker container (ARCH-003). Supervised 
 | `Librarian.Processor` | Converts documents via Pandoc/OCR |
 | `Librarian.Staging` | Staging folder handoff (ARCH-001) |
 | `Librarian.Indexer` | SQLite FTS5 index, search, relationships |
-| `Librarian.Input` | Input folder monitor, triggers conversion pipeline |
+| `Librarian.Input` | Multi-folder input monitor (via `LIBRARIAN_INPUT_PATHS`), triggers conversion pipeline |
 | `Librarian.Reporter` | Daily reports, backup pruning |
 | `Librarian.Repo` | Ecto SQLite3 database access |
 
@@ -163,10 +163,11 @@ The vault is the user-facing output. It must remain:
                     ELIXIR SERVICE                          LIBRARIAN AGENT
                     ──────────────                          ───────────────
 
-1. Document appears in input/
+1. Document appears in any configured input folder
    └── Optional companion .md
+   └── Folders: $DATA_FOLDER/input + LIBRARIAN_INPUT_PATHS
 
-2. Librarian.Input detects file
+2. Librarian.Input detects file (across all input paths)
    └── Reads companion .md
 
 3. Librarian.Processor converts
@@ -191,7 +192,7 @@ The vault is the user-facing output. It must remain:
    └── FTS5 index
    └── Relationships
 
-10. Activity logged to logs/
+10. Activity logged to $DATA_FOLDER/log/
 
 11. Staging cleanup (24h retention)
 ```
@@ -224,14 +225,18 @@ The Elixir application performs these checks on startup:
 
 1. **Vault path accessible** — `$LIBRARIAN_VAULT_PATH` exists and is writable.
 2. **Data folder accessible** — `$LIBRARIAN_DATA_FOLDER` exists and is writable.
-3. **Input folder exists** — Creates `$LIBRARIAN_DATA_FOLDER/input/` if missing.
+3. **Input folders accessible** — All paths in `LIBRARIAN_INPUT_PATHS` exist (creates `$LIBRARIAN_DATA_FOLDER/input/` if missing).
 4. **Staging folder exists** — Creates `$LIBRARIAN_DATA_FOLDER/staging/` if missing.
-5. **Logs folder exists** — Creates `$LIBRARIAN_DATA_FOLDER/logs/` and `logs/reports/` if missing.
+5. **Log folder exists** — Creates `$LIBRARIAN_DATA_FOLDER/log/` and `log/reports/` if missing.
 6. **Backups folder exists** — Creates `$LIBRARIAN_DATA_FOLDER/backups/` if missing.
 7. **Database accessible** — SQLite file exists and migrations are current.
 8. **Pandoc available** — `pandoc --version` succeeds.
 
 If the vault path or data folder is unavailable (e.g., external drive not mounted), the service logs a warning and enters a degraded mode, retrying every 60 seconds.
+
+## CI/CD
+
+GitHub Actions runs on every push/PR to `main`. See `.github/workflows/ci.yml` for the full configuration. The CI pipeline integrates with the Python pipeline runner for ADR validation and test execution.
 
 ## Related
 
@@ -239,3 +244,4 @@ If the vault path or data folder is unavailable (e.g., external drive not mounte
 - `spec/TESTING.md` — Testing strategy
 - `spec/STRUCTURE.md` — Document organization rules
 - `.archgate/adrs/` — Architecture Decision Records
+- `.github/workflows/ci.yml` — GitHub Actions CI/CD

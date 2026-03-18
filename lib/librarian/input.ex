@@ -1,8 +1,10 @@
 defmodule Librarian.Input do
   @moduledoc """
-  Monitors the input folder for new documents to process.
+  Monitors multiple input folders for new documents to process.
 
   Converts documents and stages them for the Librarian agent to classify.
+  Input paths are configured via `LIBRARIAN_INPUT_PATHS` (comma-separated)
+  plus the default `$LIBRARIAN_DATA_FOLDER/input`.
   Checks periodically (every 15 minutes by default).
   """
   use GenServer
@@ -22,7 +24,7 @@ defmodule Librarian.Input do
 
   @impl true
   def handle_info(:check_input, state) do
-    process_input_folder()
+    process_all_input_folders()
     Librarian.Staging.cleanup()
     schedule_check()
     {:noreply, state}
@@ -35,7 +37,7 @@ defmodule Librarian.Input do
 
   @impl true
   def handle_cast(:process_now, state) do
-    process_input_folder()
+    process_all_input_folders()
     {:noreply, state}
   end
 
@@ -43,10 +45,23 @@ defmodule Librarian.Input do
     Process.send_after(self(), :check_input, @check_interval_ms)
   end
 
-  defp process_input_folder do
+  defp input_paths do
+    configured = Application.get_env(:librarian, :input_paths, [])
     data_folder = Application.get_env(:librarian, :data_folder, "")
-    input_path = Path.join(data_folder, "input")
+    default = Path.join(data_folder, "input")
+    [default | configured] |> Enum.uniq()
+  end
 
+  defp process_all_input_folders do
+    paths = input_paths()
+    Logger.info("Checking #{length(paths)} input folder(s)")
+
+    Enum.each(paths, fn path ->
+      process_input_folder(path)
+    end)
+  end
+
+  defp process_input_folder(input_path) do
     if File.dir?(input_path) do
       files =
         input_path
@@ -103,18 +118,21 @@ defmodule Librarian.Input do
   end
 
   defp log_processing(path, result, staging_id) do
-    data_folder = Application.get_env(:librarian, :data_folder, "")
-    log_dir = Path.join(data_folder, "logs")
-    File.mkdir_p!(log_dir)
+    log_dir = Application.get_env(:librarian, :log_dir, "")
 
-    log_entry = """
-    ## #{DateTime.utc_now() |> DateTime.to_string()}
-    - **File**: #{Path.basename(path)}
-    - **Result**: #{inspect(result)}
-    - **Staging ID**: #{staging_id || "N/A"}
-    """
+    if log_dir != "" do
+      File.mkdir_p!(log_dir)
 
-    log_file = Path.join(log_dir, "processing.log")
-    File.write!(log_file, log_entry, [:append])
+      log_entry = """
+      ## #{DateTime.utc_now() |> DateTime.to_string()}
+      - **File**: #{Path.basename(path)}
+      - **Source folder**: #{Path.dirname(path)}
+      - **Result**: #{inspect(result)}
+      - **Staging ID**: #{staging_id || "N/A"}
+      """
+
+      log_file = Path.join(log_dir, "processing.log")
+      File.write!(log_file, log_entry, [:append])
+    end
   end
 end

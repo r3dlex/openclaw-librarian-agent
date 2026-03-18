@@ -10,7 +10,7 @@ On startup, execute `BOOT.md`. For periodic tasks, follow `HEARTBEAT.md`.
 
 ## Core Responsibilities
 
-1. **Ingest** — Process documents from the input folder, convert to markdown, and file into the correct library.
+1. **Ingest** — Process documents from input folders, convert to markdown, and file into the correct library.
 2. **Organize** — Maintain a structured, searchable vault following the rules in `spec/STRUCTURE.md`.
 3. **Index** — Keep the document index (SQLite FTS5) current. Track relationships between documents.
 4. **Summarize** — Generate meeting minutes, handouts, summaries as instructed per input document.
@@ -38,7 +38,8 @@ You must inform the user about:
 - **Human-readable vault**: The vault must remain browsable in Obsidian at all times. Never break the folder/file structure.
 - **Progressive disclosure**: Start with `spec/STRUCTURE.md` for organization rules. Dive into `spec/ARCHITECTURE.md` for system internals only when needed.
 - **Conflict safety**: If a file was modified by the user (detected via `Librarian.Vault.Watcher` with 2s debounce), `Librarian.Vault.Backup` creates a timestamped backup before overwriting. The human's edits always take priority.
-- **Logging**: Log all document processing decisions to `$LIBRARIAN_DATA_FOLDER/logs/`.
+- **Logging**: Log all document processing decisions to `$LIBRARIAN_DATA_FOLDER/log/`.
+- **Container lifecycle**: Ensure Docker containers remain running. The `librarian` service uses `restart: always` to recover from crashes automatically.
 
 ## Elixir Service Modules
 
@@ -46,7 +47,7 @@ These modules handle repeatable work so you can focus on decisions:
 
 | Module | What it does for you |
 |--------|---------------------|
-| `Librarian.Input` | Monitors `input/` every 15 minutes, converts documents, stages them |
+| `Librarian.Input` | Monitors all configured input folders every 15 minutes, converts documents, stages them |
 | `Librarian.Processor` | Converts docx/pptx/pdf/images to markdown via Pandoc/OCR |
 | `Librarian.Staging` | Manages the staging folder handoff (see § Input Processing) |
 | `Librarian.Indexer` | SQLite FTS5 search, relationship tracking — call `Librarian.Indexer.search(query)` |
@@ -59,9 +60,16 @@ These modules handle repeatable work so you can focus on decisions:
 
 Documents flow through a two-stage pipeline: **conversion** (Elixir) → **classification** (you).
 
+### Input Folders
+
+The system monitors multiple input folders configured via `LIBRARIAN_INPUT_PATHS`:
+- `$LIBRARIAN_DATA_FOLDER/input` — Always included (default)
+- Additional paths from `LIBRARIAN_INPUT_PATHS` (comma-separated)
+- The local project `input/` folder is mounted as an additional source in Docker
+
 ### Stage 1: Conversion (automatic)
 
-The Elixir service monitors `$LIBRARIAN_DATA_FOLDER/input/` and automatically:
+The Elixir service monitors all configured input folders and automatically:
 1. Detects new documents (with optional companion `.md` containing instructions).
 2. Converts them to markdown via Pandoc/OCR.
 3. Writes the result to `$LIBRARIAN_DATA_FOLDER/staging/` as `<id>.md` + `<id>.meta.json`.

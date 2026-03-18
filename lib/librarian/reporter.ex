@@ -1,6 +1,8 @@
 defmodule Librarian.Reporter do
   @moduledoc """
   Generates daily reports of processed documents and activity.
+
+  Reports are written to `$LIBRARIAN_DATA_FOLDER/log/reports/`.
   """
   use GenServer
   require Logger
@@ -45,8 +47,8 @@ defmodule Librarian.Reporter do
   end
 
   defp generate_daily_report(date) do
-    data_folder = Application.get_env(:librarian, :data_folder, "")
-    reports_dir = Path.join([data_folder, "logs", "reports"])
+    log_dir = Application.get_env(:librarian, :log_dir, "")
+    reports_dir = Path.join(log_dir, "reports")
     File.mkdir_p!(reports_dir)
 
     report_path = Path.join(reports_dir, "#{date}.md")
@@ -62,7 +64,7 @@ defmodule Librarian.Reporter do
 
     ## Documents Processed
 
-    #{fetch_daily_activity(data_folder, date)}
+    #{fetch_daily_activity(log_dir, date)}
 
     ## Summary
 
@@ -73,8 +75,8 @@ defmodule Librarian.Reporter do
     Logger.info("Daily report generated: #{report_path}")
   end
 
-  defp fetch_daily_activity(data_folder, _date) do
-    log_file = Path.join(data_folder, "logs/processing.log")
+  defp fetch_daily_activity(log_dir, _date) do
+    log_file = Path.join(log_dir, "processing.log")
 
     if File.exists?(log_file) do
       case File.read(log_file) do

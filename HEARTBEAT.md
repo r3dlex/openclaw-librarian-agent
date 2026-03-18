@@ -3,14 +3,15 @@
 Periodic tasks for the Librarian. Each task runs on the specified interval.
 
 ## Every 15 minutes
-- Check `$LIBRARIAN_DATA_FOLDER/input/` for new documents. Convert and stage any found.
+- Check all configured input folders (`$LIBRARIAN_INPUT_PATHS`) for new documents. Convert and stage any found.
 - Clean up staged items marked "filed" older than 24 hours.
+- Verify Docker containers are still running. Restart if needed (`docker compose up -d`).
 
 ## Every hour
 - Scan the vault for filesystem changes. Reprocess modified files and update the index.
 
 ## Daily (end of day)
 - Generate the daily report: documents processed, where they landed, any issues encountered.
-- Write the report to `$LIBRARIAN_DATA_FOLDER/logs/reports/YYYY-MM-DD.md`.
+- Write the report to `$LIBRARIAN_DATA_FOLDER/log/reports/YYYY-MM-DD.md`.
 - Prune backups older than 30 days from `$LIBRARIAN_DATA_FOLDER/backups/`.
 - Update `spec/LEARNINGS.md` if new patterns or issues were discovered.

@@ -30,13 +30,15 @@ RUN apk add --no-cache \
     tesseract-ocr-data-deu \
     curl \
     bash \
-    tini
+    tini \
+    inotify-tools
 
 WORKDIR /app
 
 COPY --from=builder /app/_build /app/_build
 COPY --from=builder /app/deps /app/deps
 COPY --from=builder /app/mix.exs /app/
+COPY --from=builder /app/mix.lock /app/
 COPY --from=builder /app/config /app/config
 COPY --from=builder /app/lib /app/lib
 COPY --from=builder /app/priv /app/priv

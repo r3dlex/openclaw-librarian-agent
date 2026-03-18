@@ -20,7 +20,7 @@ def daily_report(validate_only: bool):
                 "mix", "run", "-e",
                 """
                 data_folder = Application.get_env(:librarian, :data_folder, "")
-                reports_dir = Path.join([data_folder, "logs", "reports"])
+                reports_dir = Path.join([data_folder, "log", "reports"])
                 if File.dir?(reports_dir) do
                   files = File.ls!(reports_dir)
                   IO.puts("Reports found: #{length(files)}")

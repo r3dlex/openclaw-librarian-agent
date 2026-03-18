@@ -2,18 +2,21 @@ services:
   librarian:
     build: .
     container_name: openclaw-librarian
-    restart: unless-stopped
+    restart: always
     env_file: .env
     volumes:
       # Obsidian vault (read/write)
       - ${LIBRARIAN_VAULT_PATH}:/vault
-      # Data folder with input/, staging/, logs/, backups/ (read/write)
+      # Data folder with input/, staging/, log/, backups/ (read/write)
       - ${LIBRARIAN_DATA_FOLDER}:/data
+      # Local project input folder (read/write)
+      - ./input:/project-input
       # SQLite database persistence
       - librarian-db:/app/priv/data
     environment:
       - LIBRARIAN_VAULT_PATH=/vault
       - LIBRARIAN_DATA_FOLDER=/data
+      - LIBRARIAN_INPUT_PATHS=/project-input
       - LIBRARIAN_DB_PATH=/app/priv/data/librarian.db
       - MIX_ENV=prod
     healthcheck:

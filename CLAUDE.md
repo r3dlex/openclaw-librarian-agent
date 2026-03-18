@@ -21,6 +21,7 @@ This repo defines **the Librarian**, an openclaw agent that organizes, summarize
 ├── BOOT.md                   # Startup tasks
 ├── HEARTBEAT.md              # Periodic tasks
 ├── TOOLS.md                  # Environment-specific tool config
+├── input/                    # Local project input folder (mounted into container)
 ├── spec/                     # Detailed specifications
 │   ├── ARCHITECTURE.md       # System design, data flow, ADR index
 │   ├── STRUCTURE.md          # Document organization rules
@@ -30,6 +31,7 @@ This repo defines **the Librarian**, an openclaw agent that organizes, summarize
 │   ├── TROUBLESHOOTING.md    # Known issues and fixes
 │   └── LEARNINGS.md          # Accumulated agent learnings
 ├── .archgate/adrs/           # Architecture Decision Records
+├── .github/workflows/        # GitHub Actions CI/CD
 ├── tools/pipeline_runner/    # Python pipelines (Poetry, pytest)
 ├── lib/librarian/            # Elixir application source
 ├── config/                   # Elixir configuration
@@ -45,16 +47,20 @@ This repo defines **the Librarian**, an openclaw agent that organizes, summarize
 ### Two-stage pipeline
 Documents flow through: **Elixir (conversion)** → **staging folder** → **Agent (classification)**. The Elixir service converts formats via Pandoc and writes to `$LIBRARIAN_DATA_FOLDER/staging/`. The Librarian agent reads pending items, classifies, and files into the vault. See `Librarian.Staging` for the protocol.
 
+### Multi-folder input
+The `Librarian.Input` module monitors multiple input folders configured via `LIBRARIAN_INPUT_PATHS` (comma-separated). The `$LIBRARIAN_DATA_FOLDER/input` path is always included. The local `input/` directory is also mounted into the container.
+
 ### Debounce & conflict safety
 The `Librarian.Vault.Watcher` uses a **2-second debounce window** to coalesce rapid filesystem events from Google Drive sync. Own-writes are tracked with timestamps so the watcher ignores changes it caused. Before overwriting human-edited files, `Librarian.Vault.Backup` creates timestamped copies in `$LIBRARIAN_DATA_FOLDER/backups/` (30-day retention, pruned daily).
 
 ## Key Rules
 
-1. **No sensitive data in git.** Paths, emails, API keys, and library names go in `.env` (gitignored). Use `.env.example` as the template.
+1. **No sensitive data in git.** Paths, emails, API keys, and library names go in `.env` (gitignored). Use `.env.example` as the template. CI enforces this via the `sensitive-data-check` workflow.
 2. **`spec/LIBRARIES.md` is gitignored.** It contains real library names that may reveal business relationships. Only `spec/LIBRARIES.md.example` is committed.
 3. **Zero-Install policy.** All tooling runs in containers. No local Elixir/Erlang install required. Use `docker compose` for everything.
 4. **Elixir for long-running services.** Document processing pipelines, filesystem watchers, staging, and indexing run as Elixir GenServers inside Docker.
 5. **Pandoc for format conversion.** The Docker image includes Pandoc. Shell out to it for docx/pptx/etc → markdown conversion.
+6. **Containers must stay alive.** The `librarian` service uses `restart: always`. The agent checks container health in its heartbeat.
 
 ## Development Workflow
 
@@ -84,6 +90,16 @@ docker compose exec librarian mix librarian.process_input
 docker compose logs -f librarian
 ```
 
+## CI/CD
+
+GitHub Actions runs on every push/PR to `main`. See `.github/workflows/ci.yml`. Jobs:
+- **Python Pipeline Tests** — ruff lint + pytest
+- **Elixir Compile** — `mix compile --warnings-as-errors`
+- **Elixir Tests** — `mix test`
+- **ADR Compliance** — validates ADR frontmatter
+- **Docker Build** — ensures both images build
+- **Sensitive Data Audit** — scans for emails, API keys, absolute paths
+
 ## Deep Dive
 
 For detailed specifications, read the `spec/` folder:
@@ -104,7 +120,8 @@ All configuration is in `.env`. See `.env.example` for the full list with descri
 | Variable | Purpose |
 |----------|---------|
 | `LIBRARIAN_VAULT_PATH` | Obsidian vault location |
-| `LIBRARIAN_DATA_FOLDER` | Working data (input/, staging/, logs/, backups/) |
+| `LIBRARIAN_DATA_FOLDER` | Working data (input/, staging/, log/, backups/) |
+| `LIBRARIAN_INPUT_PATHS` | Comma-separated additional input folders |
 | `LIBRARIAN_DB_PATH` | SQLite index database |
 | `LIBRARIAN_LOG_LEVEL` | Log verbosity |
 | `OPENCLAW_PROVIDER_API_KEY` | AI provider API key |

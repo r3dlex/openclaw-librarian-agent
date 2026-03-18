@@ -109,8 +109,14 @@ exit_with_result(result)
 4. Add CLI help tests in `tests/test_pipelines.py`
 5. Document it in this file
 
+## CI/CD
+
+Pipeline tests and ADR validation are integrated into GitHub Actions (`.github/workflows/ci.yml`).
+The CI runs `ruff check`, `pytest`, `mix compile --warnings-as-errors`, `mix test`, ADR validation, and a sensitive data audit on every push/PR to `main`.
+
 ## Related
 
 - `spec/TESTING.md` — Testing strategy and how pipelines fit in
 - `spec/ARCHITECTURE.md` — System architecture
 - `.archgate/adrs/ARCH-006-pipeline-testing.md` — ADR for testing policy
+- `.github/workflows/ci.yml` — GitHub Actions CI/CD configuration

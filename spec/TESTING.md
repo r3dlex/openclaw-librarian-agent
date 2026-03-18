@@ -89,16 +89,25 @@ poetry run ruff check .
 
 ## CI/CD Integration
 
-The `pipeline test` command exits with code 1 on any failure, making it suitable for CI:
+GitHub Actions runs automatically on every push/PR to `main`. See `.github/workflows/ci.yml`.
 
-```yaml
-# GitHub Actions example
-- name: Run tests
-  run: docker compose run --rm pipeline-runner test
+The CI pipeline runs these jobs in parallel:
+- **python-tests** — ruff lint + pytest for the pipeline runner
+- **elixir-compile** — `mix compile --warnings-as-errors`
+- **elixir-tests** — `mix test`
+- **archgate-check** — ADR frontmatter validation via pytest
+- **docker-build** — ensures both Docker images build successfully
+- **sensitive-data-check** — scans for emails, API keys, absolute paths in committed files
+
+The `pipeline test` command also exits with code 1 on any failure, making it suitable for local CI:
+
+```bash
+docker compose run --rm pipeline-runner test
 ```
 
 ## Related
 
 - `spec/PIPELINES.md` — Pipeline definitions and usage
 - `.archgate/adrs/ARCH-006-pipeline-testing.md` — ADR for testing policy
+- `.github/workflows/ci.yml` — GitHub Actions CI/CD configuration
 - `tools/pipeline_runner/pyproject.toml` — Python test configuration
