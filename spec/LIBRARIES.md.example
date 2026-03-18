@@ -1,0 +1,63 @@
+# Libraries
+
+> Defines the document libraries managed by the Librarian.
+> Copy this file to `spec/LIBRARIES.md` and fill in your actual library definitions.
+> `spec/LIBRARIES.md` is gitignored — it may contain sensitive business relationships.
+
+## Format
+
+Each library has:
+- **Key**: Short uppercase identifier used in code and folder names.
+- **Name**: Human-readable library name.
+- **Description**: What this library contains.
+- **Keywords**: Terms that help the Librarian auto-classify documents into this library.
+
+---
+
+## EXAMPLE
+
+- **Key**: `EXAMPLE`
+- **Name**: Example Corp
+- **Description**: Documentation related to Example Corp projects, products, and meetings.
+- **Keywords**: example corp, exampleco, project-x, sprint review
+- **Vault folder**: `Example/`
+
+---
+
+## PROJECTS
+
+- **Key**: `PROJECTS`
+- **Name**: Side Projects
+- **Description**: All documents related to entrepreneurship, side projects, and business ventures.
+- **Keywords**: startup, pitch, business plan, side project, venture
+- **Vault folder**: `Projects/`
+
+---
+
+## RESEARCH
+
+- **Key**: `RESEARCH`
+- **Name**: Research
+- **Description**: Research documents, papers, and technical references.
+- **Keywords**: research, paper, study, analysis, findings
+- **Vault folder**: `Research/`
+
+---
+
+## AI
+
+- **Key**: `AI`
+- **Name**: AI & Machine Learning
+- **Description**: Documentation on AI-related topics not bound to other specific libraries.
+- **Keywords**: ai, machine learning, llm, neural network, openclaw, agent
+- **Vault folder**: `AI/`
+
+---
+
+## PERSONAL
+
+- **Key**: `PERSONAL`
+- **Name**: Personal
+- **Description**: Personal documents, notes, and records.
+- **Keywords**: personal, private, family, health, finance
+- **Vault folder**: `Personal/`

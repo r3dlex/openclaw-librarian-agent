@@ -1,0 +1,86 @@
+# Openclaw Librarian Agent — Developer Guide
+
+> This file is for **development agents** (Claude Code, CI bots) working on this repository.
+> For the Librarian agent's own instructions, see `AGENTS.md`.
+
+## Quick Orientation
+
+This repo defines **the Librarian**, an openclaw agent that organizes, summarizes, and retrieves documents in an Obsidian-compatible vault. The codebase has two audiences:
+
+| Audience | Entry Point | Purpose |
+|----------|-------------|---------|
+| Dev agents (you) | `CLAUDE.md` (this file) | Improve, test, and maintain the Librarian |
+| Openclaw Librarian | `AGENTS.md` → `IDENTITY.md`, `SOUL.md`, etc. | Runtime behavior of the agent |
+
+## Project Structure
+
+```
+├── AGENTS.md                 # Openclaw agent config (Librarian reads this)
+├── IDENTITY.md               # Librarian's identity
+├── SOUL.md                   # Librarian's values and behavior
+├── BOOT.md                   # Startup tasks
+├── HEARTBEAT.md              # Periodic tasks
+├── TOOLS.md                  # Environment-specific tool config
+├── spec/                     # Detailed specifications
+│   ├── ARCHITECTURE.md       # System design and data flow
+│   ├── STRUCTURE.md          # Document organization rules
+│   ├── LIBRARIES.md.example  # Library definitions template
+│   ├── TROUBLESHOOTING.md    # Known issues and fixes
+│   └── LEARNINGS.md          # Accumulated agent learnings
+├── lib/librarian/            # Elixir application source
+├── config/                   # Elixir configuration
+├── scripts/                  # Containerized utility scripts
+├── docker-compose.yml        # Zero-Install service definitions
+├── Dockerfile                # Librarian service container
+├── mix.exs                   # Elixir project definition
+└── test/                     # Elixir tests
+```
+
+## Key Rules
+
+1. **No sensitive data in git.** Paths, emails, API keys, and library names go in `.env` (gitignored). Use `.env.example` as the template.
+2. **`spec/LIBRARIES.md` is gitignored.** It contains real library names that may reveal business relationships. Only `spec/LIBRARIES.md.example` is committed.
+3. **Zero-Install policy.** All tooling runs in containers. No local Elixir/Erlang install required. Use `docker compose` for everything.
+4. **Elixir for long-running services.** Document processing pipelines, filesystem watchers, and indexing run as Elixir GenServers inside Docker.
+5. **Pandoc for format conversion.** The Docker image includes Pandoc. Shell out to it for docx/pptx/etc → markdown conversion.
+
+## Development Workflow
+
+```bash
+# Start all services (Elixir app, SQLite, watchers)
+docker compose up -d
+
+# Run tests
+docker compose exec librarian mix test
+
+# Open an IEx shell
+docker compose exec librarian iex -S mix
+
+# Process input folder manually
+docker compose exec librarian mix librarian.process_input
+
+# View logs
+docker compose logs -f librarian
+```
+
+## Deep Dive
+
+For detailed specifications, read the `spec/` folder:
+
+- **Architecture & data flow** → `spec/ARCHITECTURE.md`
+- **Document organization rules** → `spec/STRUCTURE.md`
+- **Library definitions** → `spec/LIBRARIES.md` (local only, see `.example`)
+- **Troubleshooting** → `spec/TROUBLESHOOTING.md`
+- **Learnings log** → `spec/LEARNINGS.md`
+
+## Environment Variables
+
+All configuration is in `.env`. See `.env.example` for the full list with descriptions.
+
+| Variable | Purpose |
+|----------|---------|
+| `LIBRARIAN_VAULT_PATH` | Obsidian vault location |
+| `LIBRARIAN_DATA_FOLDER` | Working data (input/, logs/) |
+| `LIBRARIAN_DB_PATH` | SQLite index database |
+| `LIBRARIAN_LOG_LEVEL` | Log verbosity |
+| `OPENCLAW_PROVIDER_API_KEY` | AI provider API key |

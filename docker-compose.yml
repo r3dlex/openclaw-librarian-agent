@@ -1,0 +1,27 @@
+services:
+  librarian:
+    build: .
+    container_name: openclaw-librarian
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      # Obsidian vault (read/write)
+      - ${LIBRARIAN_VAULT_PATH}:/vault
+      # Data folder with input/, logs/ (read/write)
+      - ${LIBRARIAN_DATA_FOLDER}:/data
+      # SQLite database persistence
+      - librarian-db:/app/priv/data
+    environment:
+      - LIBRARIAN_VAULT_PATH=/vault
+      - LIBRARIAN_DATA_FOLDER=/data
+      - LIBRARIAN_DB_PATH=/app/priv/data/librarian.db
+      - MIX_ENV=prod
+    healthcheck:
+      test: ["CMD", "/app/scripts/healthcheck.sh"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  librarian-db:
