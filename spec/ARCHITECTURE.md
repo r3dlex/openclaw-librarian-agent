@@ -86,6 +86,7 @@ A long-running OTP application inside a Docker container (ARCH-003). Supervised 
 | `Librarian.Indexer` | SQLite FTS5 index, search, relationships |
 | `Librarian.Input` | Multi-folder input monitor (via `LIBRARIAN_INPUT_PATHS`), triggers conversion pipeline |
 | `Librarian.Reporter` | Daily reports, backup pruning |
+| `Librarian.Archiver` | Weekly compression of processed documents (Sundays midnight UTC) |
 | `Librarian.Repo` | Ecto SQLite3 database access |
 
 ### 3. Pipeline Runner (Python)
@@ -175,7 +176,7 @@ The vault is the user-facing output. It must remain:
 
 4. Librarian.Staging.stage()              5. Agent reads staging/
    └── Writes <id>.md + .meta.json           └── Reads .md content + .meta.json
-   └── Removes source from input/            └── Checks user instructions
+   └── Moves source to processed/            └── Checks user instructions
 
                                            6. Agent classifies
                                               └── Determines: library, type, tags
@@ -195,6 +196,8 @@ The vault is the user-facing output. It must remain:
 10. Activity logged to $DATA_FOLDER/log/
 
 11. Staging cleanup (24h retention)
+
+12. Weekly: Librarian.Archiver compresses processed/ → .tar.gz
 ```
 
 ## Data Flow: Vault Change Detection (ARCH-004, ARCH-005)

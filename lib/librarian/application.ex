@@ -2,7 +2,7 @@ defmodule Librarian.Application do
   @moduledoc """
   OTP Application for the Librarian agent.
 
-  Supervises: Repo, Vault.Watcher, Input monitor, and Reporter.
+  Supervises: Repo, Vault.Watcher, Input monitor, Reporter, and Archiver.
   """
   use Application
 
@@ -12,7 +12,8 @@ defmodule Librarian.Application do
       Librarian.Repo,
       Librarian.Vault.Watcher,
       Librarian.Input,
-      Librarian.Reporter
+      Librarian.Reporter,
+      Librarian.Archiver
     ]
 
     opts = [strategy: :one_for_one, name: Librarian.Supervisor]

@@ -15,3 +15,8 @@ Periodic tasks for the Librarian. Each task runs on the specified interval.
 - Write the report to `$LIBRARIAN_DATA_FOLDER/log/reports/YYYY-MM-DD.md`.
 - Prune backups older than 30 days from `$LIBRARIAN_DATA_FOLDER/backups/`.
 - Update `spec/LEARNINGS.md` if new patterns or issues were discovered.
+
+## Weekly (Sunday midnight UTC)
+- Archive all files in each data folder's `processed/` directory into `processed-documents-WeekWW-YYYY.tar.gz`.
+- Remove archived originals after successful compression.
+- Log the archive operation to `$LIBRARIAN_DATA_FOLDER/log/archiver.log`.

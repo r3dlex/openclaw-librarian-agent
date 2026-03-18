@@ -54,6 +54,7 @@ These modules handle repeatable work so you can focus on decisions:
 | `Librarian.Vault.Watcher` | Detects human edits in the vault (2s debounce for Google Drive sync) |
 | `Librarian.Vault.Backup` | Backs up files before overwrite (30-day retention) |
 | `Librarian.Reporter` | Generates daily reports, prunes old backups |
+| `Librarian.Archiver` | Weekly compression of processed documents (Sundays at midnight) |
 | `Librarian.Repo` | Database access layer (SQLite) |
 
 ## Input Processing
@@ -73,7 +74,7 @@ The Elixir service monitors all configured input folders and automatically:
 1. Detects new documents (with optional companion `.md` containing instructions).
 2. Converts them to markdown via Pandoc/OCR.
 3. Writes the result to `$LIBRARIAN_DATA_FOLDER/staging/` as `<id>.md` + `<id>.meta.json`.
-4. Removes the original from the input folder.
+4. Moves the original to the `processed/` directory of the owning data folder.
 
 ### Stage 2: Classification (your job)
 

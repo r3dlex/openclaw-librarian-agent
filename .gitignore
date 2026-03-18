@@ -67,6 +67,10 @@ USER.md
 /input/*
 !/input/.gitkeep
 
+# ---- Processed folder contents ----
+/processed/*
+!/processed/.gitkeep
+
 # ---- Temporary / Runtime ----
 /tmp/
 /.cache/

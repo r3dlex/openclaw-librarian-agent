@@ -22,6 +22,7 @@ This repo defines **the Librarian**, an openclaw agent that organizes, summarize
 ├── HEARTBEAT.md              # Periodic tasks
 ├── TOOLS.md                  # Environment-specific tool config
 ├── input/                    # Local project input folder (mounted into container)
+├── processed/                # Processed input files (archived weekly)
 ├── spec/                     # Detailed specifications
 │   ├── ARCHITECTURE.md       # System design, data flow, ADR index
 │   ├── STRUCTURE.md          # Document organization rules
@@ -120,7 +121,7 @@ All configuration is in `.env`. See `.env.example` for the full list with descri
 | Variable | Purpose |
 |----------|---------|
 | `LIBRARIAN_VAULT_PATH` | Obsidian vault location |
-| `LIBRARIAN_DATA_FOLDER` | Working data (input/, staging/, log/, backups/) |
+| `LIBRARIAN_DATA_FOLDER` | Comma-separated data folders (input/, staging/, log/, backups/, processed/) |
 | `LIBRARIAN_INPUT_PATHS` | Comma-separated additional input folders |
 | `LIBRARIAN_DB_PATH` | SQLite index database |
 | `LIBRARIAN_LOG_LEVEL` | Log verbosity |

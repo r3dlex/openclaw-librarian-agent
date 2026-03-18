@@ -5,6 +5,9 @@ defmodule Librarian.Input do
   Converts documents and stages them for the Librarian agent to classify.
   Input paths are configured via `LIBRARIAN_INPUT_PATHS` (comma-separated)
   plus the default `$LIBRARIAN_DATA_FOLDER/input`.
+
+  After processing, source files are moved to the `processed/` directory
+  of the data folder that owns the input path (or the primary data folder).
   Checks periodically (every 15 minutes by default).
   """
   use GenServer
@@ -104,16 +107,69 @@ defmodule Librarian.Input do
 
         log_processing(path, :ok, id)
 
-        # Remove source and companion from input
-        File.rm(path)
+        # Move source and companion to processed/
+        move_to_processed(path)
         companion = Path.rootname(path) <> ".md"
-        if File.exists?(companion), do: File.rm(companion)
+        if File.exists?(companion), do: move_to_processed(companion)
 
         Logger.info("Staged #{Path.basename(path)} as #{id}")
 
       {:error, reason} ->
         Logger.error("Failed to process #{path}: #{reason}")
         log_processing(path, {:error, reason}, nil)
+    end
+  end
+
+  defp move_to_processed(path) do
+    processed_dir = resolve_processed_dir(path)
+    File.mkdir_p!(processed_dir)
+    dest = Path.join(processed_dir, Path.basename(path))
+
+    # Avoid overwriting: append timestamp if file exists
+    dest =
+      if File.exists?(dest) do
+        ts = DateTime.utc_now() |> Calendar.strftime("%Y%m%d_%H%M%S")
+        ext = Path.extname(dest)
+        base = Path.rootname(dest)
+        "#{base}_#{ts}#{ext}"
+      else
+        dest
+      end
+
+    case File.rename(path, dest) do
+      :ok ->
+        Logger.debug("Moved #{Path.basename(path)} to processed/")
+
+      {:error, :exdev} ->
+        # Cross-device: copy then delete
+        File.cp!(path, dest)
+        File.rm!(path)
+        Logger.debug("Copied #{Path.basename(path)} to processed/ (cross-device)")
+
+      {:error, reason} ->
+        Logger.warning("Failed to move #{path} to processed/: #{inspect(reason)}, removing instead")
+        File.rm(path)
+    end
+  end
+
+  defp resolve_processed_dir(path) do
+    data_folders = Application.get_env(:librarian, :data_folders, [])
+    input_dir = Path.dirname(path)
+
+    # Find the data folder that owns this input path
+    owner =
+      Enum.find(data_folders, fn df ->
+        String.starts_with?(input_dir, df)
+      end)
+
+    case owner do
+      nil ->
+        # Input not under any data folder — use primary
+        primary = Application.get_env(:librarian, :data_folder, "")
+        Path.join(primary, "processed")
+
+      df ->
+        Path.join(df, "processed")
     end
   end
 
