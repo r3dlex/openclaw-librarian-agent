@@ -22,11 +22,15 @@ This repo defines **the Librarian**, an openclaw agent that organizes, summarize
 ├── HEARTBEAT.md              # Periodic tasks
 ├── TOOLS.md                  # Environment-specific tool config
 ├── spec/                     # Detailed specifications
-│   ├── ARCHITECTURE.md       # System design and data flow
+│   ├── ARCHITECTURE.md       # System design, data flow, ADR index
 │   ├── STRUCTURE.md          # Document organization rules
+│   ├── PIPELINES.md          # Pipeline definitions and usage
+│   ├── TESTING.md            # Testing strategy and instructions
 │   ├── LIBRARIES.md.example  # Library definitions template
 │   ├── TROUBLESHOOTING.md    # Known issues and fixes
 │   └── LEARNINGS.md          # Accumulated agent learnings
+├── .archgate/adrs/           # Architecture Decision Records
+├── tools/pipeline_runner/    # Python pipelines (Poetry, pytest)
 ├── lib/librarian/            # Elixir application source
 ├── config/                   # Elixir configuration
 ├── scripts/                  # Containerized utility scripts
@@ -58,8 +62,17 @@ The `Librarian.Vault.Watcher` uses a **2-second debounce window** to coalesce ra
 # Start all services (Elixir app, SQLite, watchers)
 docker compose up -d
 
-# Run tests
+# Run full test suite (Elixir + Python)
+docker compose run --rm pipeline-runner test
+
+# Run Elixir tests only
 docker compose exec librarian mix test
+
+# Run Python pipeline tests only
+cd tools/pipeline_runner && poetry run pytest
+
+# Run ADR compliance checks
+docker compose run --rm pipeline-runner archgate-check
 
 # Open an IEx shell
 docker compose exec librarian iex -S mix
@@ -75,11 +88,14 @@ docker compose logs -f librarian
 
 For detailed specifications, read the `spec/` folder:
 
-- **Architecture & data flow** → `spec/ARCHITECTURE.md`
+- **Architecture & data flow** → `spec/ARCHITECTURE.md` (references ADRs in `.archgate/adrs/`)
+- **Pipelines** → `spec/PIPELINES.md`
+- **Testing strategy** → `spec/TESTING.md`
 - **Document organization rules** → `spec/STRUCTURE.md`
 - **Library definitions** → `spec/LIBRARIES.md` (local only, see `.example`)
 - **Troubleshooting** → `spec/TROUBLESHOOTING.md`
 - **Learnings log** → `spec/LEARNINGS.md`
+- **ADRs** → `.archgate/adrs/` (ARCH-001 through ARCH-006)
 
 ## Environment Variables
 

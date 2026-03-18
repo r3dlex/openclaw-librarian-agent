@@ -96,6 +96,23 @@ All configuration is through environment variables in `.env`. See [.env.example]
 | `LIBRARIAN_DB_PATH` | SQLite database path (optional) |
 | `LIBRARIAN_LOG_LEVEL` | Log level: debug, info, warning, error |
 
+## Pipelines
+
+Operational pipelines are defined in `tools/pipeline_runner/` (Python, Poetry). All run inside Docker.
+
+```bash
+# Run full test suite
+docker compose run --rm pipeline-runner test
+
+# Run ADR compliance checks
+docker compose run --rm pipeline-runner archgate-check
+
+# Validate document processing flow
+docker compose run --rm pipeline-runner document-processing --dry-run
+```
+
+See [spec/PIPELINES.md](spec/PIPELINES.md) for details. See [spec/TESTING.md](spec/TESTING.md) for the testing strategy.
+
 ## Project Structure
 
 ```
@@ -104,9 +121,13 @@ All configuration is through environment variables in `.env`. See [.env.example]
 ├── BOOT.md / HEARTBEAT.md # Startup and periodic tasks
 ├── TOOLS.md               # Environment-specific tool config
 ├── spec/                  # Detailed specifications
-│   ├── ARCHITECTURE.md    # System design
+│   ├── ARCHITECTURE.md    # System design + ADR index
 │   ├── STRUCTURE.md       # Document organization rules
+│   ├── PIPELINES.md       # Pipeline definitions
+│   ├── TESTING.md         # Testing strategy
 │   └── LIBRARIES.md       # Library definitions (local only)
+├── .archgate/adrs/        # Architecture Decision Records
+├── tools/pipeline_runner/  # Python CI/CD pipelines
 ├── lib/librarian/         # Elixir application
 ├── scripts/               # Containerized utility scripts
 ├── docker-compose.yml     # Service definitions
@@ -115,14 +136,15 @@ All configuration is through environment variables in `.env`. See [.env.example]
 
 ## Zero-Install Policy
 
-No local Elixir, Erlang, or Pandoc installation required. Everything runs inside Docker containers. The only prerequisites are Docker and Docker Compose.
+No local Elixir, Erlang, Python, or Pandoc installation required. Everything runs inside Docker containers. The only prerequisites are Docker and Docker Compose.
 
 ## Contributing
 
 1. Fork the repository
 2. Create a feature branch
 3. Read [CLAUDE.md](CLAUDE.md) for development conventions
-4. Submit a pull request
+4. Run `docker compose run --rm pipeline-runner test` before submitting
+5. Submit a pull request
 
 ## License
 

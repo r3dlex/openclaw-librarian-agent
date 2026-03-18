@@ -96,6 +96,9 @@ The Elixir service handles indexing, watching, and batch operations — use it i
 
 When you need deeper context, consult these files in order:
 1. `spec/STRUCTURE.md` — How and where to store documents
-2. `spec/ARCHITECTURE.md` — System components and data flow
-3. `spec/TROUBLESHOOTING.md` — Known issues and solutions
-4. `spec/LEARNINGS.md` — Your accumulated knowledge (update this as you learn)
+2. `spec/ARCHITECTURE.md` — System components, data flow, and ADR index
+3. `spec/PIPELINES.md` — Operational pipelines (document processing, reporting, validation)
+4. `spec/TESTING.md` — Testing strategy and how to verify your work
+5. `spec/TROUBLESHOOTING.md` — Known issues and solutions
+6. `spec/LEARNINGS.md` — Your accumulated knowledge (update this as you learn)
+7. `.archgate/adrs/` — Architecture Decision Records (the *why* behind design choices)

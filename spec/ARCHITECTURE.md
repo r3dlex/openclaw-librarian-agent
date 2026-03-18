@@ -1,6 +1,20 @@
 # Architecture
 
 > System design and data flow for the Openclaw Librarian Agent.
+> Key decisions are recorded as ADRs in `.archgate/adrs/`. This document is the overview; ADRs are the source of truth for *why*.
+
+## Architecture Decision Records
+
+Each major decision has a corresponding ADR. Read this document for *what* and *how*; read the ADR for *why*.
+
+| ADR | Decision | Status |
+|-----|----------|--------|
+| [ARCH-001](/.archgate/adrs/ARCH-001-two-stage-pipeline.md) | Two-stage pipeline (Elixir converts, Agent classifies) | Accepted |
+| [ARCH-002](/.archgate/adrs/ARCH-002-vault-storage.md) | Obsidian vault as primary storage | Accepted |
+| [ARCH-003](/.archgate/adrs/ARCH-003-zero-install-containers.md) | Zero-install policy via Docker containers | Accepted |
+| [ARCH-004](/.archgate/adrs/ARCH-004-debounce-strategy.md) | 2-second debounce for Google Drive sync | Accepted |
+| [ARCH-005](/.archgate/adrs/ARCH-005-backup-before-overwrite.md) | Backup before overwrite policy | Accepted |
+| [ARCH-006](/.archgate/adrs/ARCH-006-pipeline-testing.md) | Pipeline-driven testing and validation | Accepted |
 
 ## Overview
 
@@ -23,26 +37,26 @@
 ┌──────────────────────┐    ┌─────────────────────────────┐
 │  Elixir Service      │    │  Obsidian Vault             │
 │  (Docker container)  │    │  ($LIBRARIAN_VAULT_PATH)    │
-│                      │    │                             │
-│  ┌────────────────┐  │    │  Markdown files, assets,    │
-│  │ Vault.Watcher  │──┼────│  glossaries, indexes        │
-│  │ (inotify/fsevents)│ │  │                             │
-│  └────────────────┘  │    └─────────────────────────────┘
-│  ┌────────────────┐  │
-│  │ Processor      │  │    ┌─────────────────────────────┐
-│  │ (Pandoc shell) │  │    │  Input Folder               │
-│  └────────────────┘  │    │  ($LIBRARIAN_DATA_FOLDER/   │
-│  ┌────────────────┐  │    │   input/)                   │
-│  │ Indexer (FTS5) │  │    │                             │
-│  └────────────────┘  │    │  Raw docs + instruction MDs │
+│                      │    │  → ARCH-002                 │
 │  ┌────────────────┐  │    └─────────────────────────────┘
-│  │ Reporter       │  │
-│  └────────────────┘  │    ┌─────────────────────────────┐
-│          │           │    │  SQLite Database             │
-│          └───────────┼────│  ($LIBRARIAN_DB_PATH)       │
-│                      │    │                             │
-└──────────────────────┘    │  FTS5 index, relationships, │
-                            │  processing log             │
+│  │ Vault.Watcher  │──┼──→ ARCH-004 (debounce)
+│  │ Vault.Backup   │──┼──→ ARCH-005 (backup)
+│  └────────────────┘  │
+│  ┌────────────────┐  │    ┌─────────────────────────────┐
+│  │ Input          │  │    │  Input / Staging Folders     │
+│  │ Processor      │──┼──→ │  → ARCH-001 (two-stage)     │
+│  │ Staging        │  │    └─────────────────────────────┘
+│  └────────────────┘  │
+│  ┌────────────────┐  │    ┌─────────────────────────────┐
+│  │ Indexer (FTS5) │  │    │  SQLite Database             │
+│  │ Reporter       │──┼──→ │  ($LIBRARIAN_DB_PATH)       │
+│  └────────────────┘  │    └─────────────────────────────┘
+│                      │
+└──────────────────────┘    ┌─────────────────────────────┐
+                            │  Pipeline Runner (Python)    │
+                            │  (Docker container)          │
+                            │  → ARCH-003 (zero-install)   │
+                            │  → ARCH-006 (testing)        │
                             └─────────────────────────────┘
 ```
 
@@ -56,24 +70,31 @@ The AI agent that handles:
 - **User interaction** — Responds to queries, accepts instructions via companion `.md` files.
 - **Reporting** — Generates human-readable daily reports.
 
-The agent delegates all repeatable, mechanical work to the Elixir service.
+The agent delegates all repeatable, mechanical work to the Elixir service (ARCH-001).
 
 ### 2. Elixir Service (`Librarian` application)
 
-A long-running OTP application inside a Docker container. Supervised processes:
+A long-running OTP application inside a Docker container (ARCH-003). Supervised processes:
 
 | Module | Responsibility |
 |--------|---------------|
 | `Librarian.Application` | OTP supervisor tree |
-| `Librarian.Vault.Watcher` | FSEvents/inotify watcher on the vault path. Detects human edits with 2s debounce to handle Google Drive sync noise. |
-| `Librarian.Vault.Backup` | Creates timestamped backups before overwriting human-edited files. 30-day retention with daily pruning. |
-| `Librarian.Processor` | Converts documents via Pandoc. Extracts text, metadata, and structure. |
-| `Librarian.Indexer` | Manages SQLite FTS5 index. Handles search queries, relationship tracking, and tag management. |
-| `Librarian.Staging` | Manages the staging folder — the handoff point between Elixir (conversion) and the agent (classification). |
-| `Librarian.Reporter` | Generates daily/weekly reports from the processing log. Prunes old backups. |
-| `Librarian.Input` | Monitors the input folder, converts documents, and stages them for agent classification. |
+| `Librarian.Vault.Watcher` | FSEvents/inotify watcher with 2s debounce (ARCH-004) |
+| `Librarian.Vault.Backup` | Timestamped backups before overwrite (ARCH-005) |
+| `Librarian.Processor` | Converts documents via Pandoc/OCR |
+| `Librarian.Staging` | Staging folder handoff (ARCH-001) |
+| `Librarian.Indexer` | SQLite FTS5 index, search, relationships |
+| `Librarian.Input` | Input folder monitor, triggers conversion pipeline |
+| `Librarian.Reporter` | Daily reports, backup pruning |
+| `Librarian.Repo` | Ecto SQLite3 database access |
 
-### 3. SQLite Database
+### 3. Pipeline Runner (Python)
+
+A CLI tool for CI/CD and operational pipelines (ARCH-006). Runs inside its own Docker container (ARCH-003).
+
+See `spec/PIPELINES.md` for pipeline definitions and `spec/TESTING.md` for the testing strategy.
+
+### 4. SQLite Database
 
 Schema (managed by Ecto migrations):
 
@@ -129,14 +150,14 @@ CREATE TABLE glossary (
 );
 ```
 
-### 4. Obsidian Vault
+### 5. Obsidian Vault (ARCH-002)
 
 The vault is the user-facing output. It must remain:
 - **Human-readable** — Browsable in Obsidian without the Elixir service running.
 - **Consistent** — Front matter, naming, and folder structure follow `spec/STRUCTURE.md`.
-- **Non-destructive** — Human edits are respected. The Librarian backs up before overwriting.
+- **Non-destructive** — Human edits are respected. The Librarian backs up before overwriting (ARCH-005).
 
-## Data Flow: Document Ingestion
+## Data Flow: Document Ingestion (ARCH-001)
 
 ```
                     ELIXIR SERVICE                          LIBRARIAN AGENT
@@ -161,7 +182,7 @@ The vault is the user-facing output. It must remain:
 
                                            7. Agent writes to vault
                                               └── Correct library/subfolder
-                                              └── Registers own write (debounce)
+                                              └── Registers own write (ARCH-004)
 
                                            8. Agent calls mark_filed(id, path)
                                               └── Updates .meta.json status
@@ -175,26 +196,26 @@ The vault is the user-facing output. It must remain:
 11. Staging cleanup (24h retention)
 ```
 
-## Data Flow: Vault Change Detection
+## Data Flow: Vault Change Detection (ARCH-004, ARCH-005)
 
 ```
 1. Librarian.Vault.Watcher receives FSEvent
 
-2. Debounce (2s window)
+2. Debounce (2s window) — ARCH-004
    └── Coalesces rapid events from Google Drive sync
    └── If same file fires multiple events within 2s, only the last triggers processing
 
-3. Own-write check
+3. Own-write check — ARCH-004
    └── If path was registered via register_own_write() within debounce window → ignore
 
 4. External change detected:
-   a. Librarian.Vault.Backup.backup(path)  — timestamped copy to backups/
-   b. Librarian.Indexer.reindex(path)      — re-read and update FTS5 index
+   a. Librarian.Vault.Backup.backup(path) — ARCH-005
+   b. Librarian.Indexer.reindex(path)
    c. Check if relationships or tags changed
    d. Update vault indexes if needed
    e. Log the change
 
-5. Backup pruning (daily, 30-day retention)
+5. Backup pruning (daily, 30-day retention) — ARCH-005
 ```
 
 ## Health Checks
@@ -211,3 +232,10 @@ The Elixir application performs these checks on startup:
 8. **Pandoc available** — `pandoc --version` succeeds.
 
 If the vault path or data folder is unavailable (e.g., external drive not mounted), the service logs a warning and enters a degraded mode, retrying every 60 seconds.
+
+## Related
+
+- `spec/PIPELINES.md` — Pipeline definitions and usage
+- `spec/TESTING.md` — Testing strategy
+- `spec/STRUCTURE.md` — Document organization rules
+- `.archgate/adrs/` — Architecture Decision Records
