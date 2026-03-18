@@ -204,8 +204,10 @@ The Elixir application performs these checks on startup:
 1. **Vault path accessible** — `$LIBRARIAN_VAULT_PATH` exists and is writable.
 2. **Data folder accessible** — `$LIBRARIAN_DATA_FOLDER` exists and is writable.
 3. **Input folder exists** — Creates `$LIBRARIAN_DATA_FOLDER/input/` if missing.
-4. **Logs folder exists** — Creates `$LIBRARIAN_DATA_FOLDER/logs/` and `logs/reports/` if missing.
-5. **Database accessible** — SQLite file exists and migrations are current.
-6. **Pandoc available** — `pandoc --version` succeeds.
+4. **Staging folder exists** — Creates `$LIBRARIAN_DATA_FOLDER/staging/` if missing.
+5. **Logs folder exists** — Creates `$LIBRARIAN_DATA_FOLDER/logs/` and `logs/reports/` if missing.
+6. **Backups folder exists** — Creates `$LIBRARIAN_DATA_FOLDER/backups/` if missing.
+7. **Database accessible** — SQLite file exists and migrations are current.
+8. **Pandoc available** — `pandoc --version` succeeds.
 
 If the vault path or data folder is unavailable (e.g., external drive not mounted), the service logs a warning and enters a degraded mode, retrying every 60 seconds.

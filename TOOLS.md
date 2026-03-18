@@ -29,8 +29,11 @@ Format conversion uses Pandoc (available in the Docker container):
 
 The Elixir application provides these services (accessible via Mix tasks or IEx):
 
-- `Librarian.Vault.Watcher` — Filesystem change detection
+- `Librarian.Repo` — Ecto SQLite3 database access
+- `Librarian.Vault.Watcher` — Filesystem change detection with 2s debounce for Google Drive sync
 - `Librarian.Vault.Backup` — File backup before overwrite (30-day retention, daily pruning)
-- `Librarian.Processor` — Document conversion and classification
-- `Librarian.Indexer` — SQLite FTS5 indexing and search
+- `Librarian.Processor` — Document format conversion (Pandoc/OCR)
+- `Librarian.Staging` — Staging folder handoff between Elixir (conversion) and agent (classification)
+- `Librarian.Indexer` — SQLite FTS5 indexing, search, and relationship tracking
+- `Librarian.Input` — Input folder monitor (15-minute interval, triggers conversion and staging)
 - `Librarian.Reporter` — Daily report generation + backup pruning

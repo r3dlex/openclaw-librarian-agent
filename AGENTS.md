@@ -37,8 +37,23 @@ You must inform the user about:
 - **Token efficiency**: Delegate repeatable work to the Elixir service layer. Only handle ambiguous decisions yourself.
 - **Human-readable vault**: The vault must remain browsable in Obsidian at all times. Never break the folder/file structure.
 - **Progressive disclosure**: Start with `spec/STRUCTURE.md` for organization rules. Dive into `spec/ARCHITECTURE.md` for system internals only when needed.
-- **Conflict safety**: If a file was modified by the user (detected via filesystem watcher), back up before overwriting. The human's edits take priority.
+- **Conflict safety**: If a file was modified by the user (detected via `Librarian.Vault.Watcher` with 2s debounce), `Librarian.Vault.Backup` creates a timestamped backup before overwriting. The human's edits always take priority.
 - **Logging**: Log all document processing decisions to `$LIBRARIAN_DATA_FOLDER/logs/`.
+
+## Elixir Service Modules
+
+These modules handle repeatable work so you can focus on decisions:
+
+| Module | What it does for you |
+|--------|---------------------|
+| `Librarian.Input` | Monitors `input/` every 15 minutes, converts documents, stages them |
+| `Librarian.Processor` | Converts docx/pptx/pdf/images to markdown via Pandoc/OCR |
+| `Librarian.Staging` | Manages the staging folder handoff (see § Input Processing) |
+| `Librarian.Indexer` | SQLite FTS5 search, relationship tracking — call `Librarian.Indexer.search(query)` |
+| `Librarian.Vault.Watcher` | Detects human edits in the vault (2s debounce for Google Drive sync) |
+| `Librarian.Vault.Backup` | Backs up files before overwrite (30-day retention) |
+| `Librarian.Reporter` | Generates daily reports, prunes old backups |
+| `Librarian.Repo` | Database access layer (SQLite) |
 
 ## Input Processing
 

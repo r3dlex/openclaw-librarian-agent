@@ -36,12 +36,20 @@ This repo defines **the Librarian**, an openclaw agent that organizes, summarize
 └── test/                     # Elixir tests
 ```
 
+## Key Concepts
+
+### Two-stage pipeline
+Documents flow through: **Elixir (conversion)** → **staging folder** → **Agent (classification)**. The Elixir service converts formats via Pandoc and writes to `$LIBRARIAN_DATA_FOLDER/staging/`. The Librarian agent reads pending items, classifies, and files into the vault. See `Librarian.Staging` for the protocol.
+
+### Debounce & conflict safety
+The `Librarian.Vault.Watcher` uses a **2-second debounce window** to coalesce rapid filesystem events from Google Drive sync. Own-writes are tracked with timestamps so the watcher ignores changes it caused. Before overwriting human-edited files, `Librarian.Vault.Backup` creates timestamped copies in `$LIBRARIAN_DATA_FOLDER/backups/` (30-day retention, pruned daily).
+
 ## Key Rules
 
 1. **No sensitive data in git.** Paths, emails, API keys, and library names go in `.env` (gitignored). Use `.env.example` as the template.
 2. **`spec/LIBRARIES.md` is gitignored.** It contains real library names that may reveal business relationships. Only `spec/LIBRARIES.md.example` is committed.
 3. **Zero-Install policy.** All tooling runs in containers. No local Elixir/Erlang install required. Use `docker compose` for everything.
-4. **Elixir for long-running services.** Document processing pipelines, filesystem watchers, and indexing run as Elixir GenServers inside Docker.
+4. **Elixir for long-running services.** Document processing pipelines, filesystem watchers, staging, and indexing run as Elixir GenServers inside Docker.
 5. **Pandoc for format conversion.** The Docker image includes Pandoc. Shell out to it for docx/pptx/etc → markdown conversion.
 
 ## Development Workflow
@@ -80,7 +88,7 @@ All configuration is in `.env`. See `.env.example` for the full list with descri
 | Variable | Purpose |
 |----------|---------|
 | `LIBRARIAN_VAULT_PATH` | Obsidian vault location |
-| `LIBRARIAN_DATA_FOLDER` | Working data (input/, logs/) |
+| `LIBRARIAN_DATA_FOLDER` | Working data (input/, staging/, logs/, backups/) |
 | `LIBRARIAN_DB_PATH` | SQLite index database |
 | `LIBRARIAN_LOG_LEVEL` | Log verbosity |
 | `OPENCLAW_PROVIDER_API_KEY` | AI provider API key |

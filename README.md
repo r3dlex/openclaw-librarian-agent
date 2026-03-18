@@ -19,8 +19,11 @@ An autonomous document organization agent built on [Openclaw](https://docs.openc
 Openclaw Gateway → Librarian Agent (AI decisions)
                          ↕
                    Elixir Service (Docker)
-                   ├── Vault.Watcher (filesystem events)
-                   ├── Processor (Pandoc conversion)
+                   ├── Input (monitors input folder)
+                   ├── Processor (Pandoc/OCR conversion)
+                   ├── Staging (handoff to agent)
+                   ├── Vault.Watcher (filesystem events, 2s debounce)
+                   ├── Vault.Backup (pre-overwrite backups, 30-day retention)
                    ├── Indexer (SQLite FTS5)
                    └── Reporter (daily reports)
                          ↕
@@ -62,7 +65,7 @@ docker compose exec librarian /app/scripts/healthcheck.sh
 
 ### Usage
 
-**Drop documents into the input folder** at `$LIBRARIAN_DATA_FOLDER/input/`. The Librarian processes them every 15 minutes, or trigger manually:
+**Drop documents into the input folder** at `$LIBRARIAN_DATA_FOLDER/input/`. The Elixir service converts them and stages for the agent to classify (every 15 minutes), or trigger manually:
 
 ```bash
 ./scripts/process-input.sh
@@ -89,7 +92,7 @@ All configuration is through environment variables in `.env`. See [.env.example]
 | Variable | Description |
 |----------|-------------|
 | `LIBRARIAN_VAULT_PATH` | Path to the Obsidian vault |
-| `LIBRARIAN_DATA_FOLDER` | Working directory (input/, logs/) |
+| `LIBRARIAN_DATA_FOLDER` | Working directory (input/, staging/, logs/, backups/) |
 | `LIBRARIAN_DB_PATH` | SQLite database path (optional) |
 | `LIBRARIAN_LOG_LEVEL` | Log level: debug, info, warning, error |
 
