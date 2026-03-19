@@ -22,10 +22,34 @@ if config_env() == :prod do
   config :librarian, Librarian.Repo,
     database: System.get_env("LIBRARIAN_DB_PATH", "/app/priv/data/librarian.db")
 
+  # Parse numbered Atlassian accounts: ATLASSIAN_1_URL, ATLASSIAN_1_EMAIL, etc.
+  atlassian_accounts =
+    1..20
+    |> Enum.reduce([], fn n, acc ->
+      prefix = "ATLASSIAN_#{n}_"
+
+      case System.get_env("#{prefix}URL") do
+        nil ->
+          acc
+
+        url ->
+          account = %{
+            label: System.get_env("#{prefix}LABEL", "account_#{n}"),
+            url: url,
+            email: System.get_env("#{prefix}EMAIL", ""),
+            token: System.get_env("#{prefix}TOKEN", "")
+          }
+
+          [account | acc]
+      end
+    end)
+    |> Enum.reverse()
+
   config :librarian,
     vault_path: System.fetch_env!("LIBRARIAN_VAULT_PATH"),
     data_folder: primary_data_folder,
     data_folders: data_folders,
     input_paths: input_paths,
-    log_dir: Path.join(primary_data_folder, "log")
+    log_dir: Path.join(primary_data_folder, "log"),
+    atlassian_accounts: atlassian_accounts
 end

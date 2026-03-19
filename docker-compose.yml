@@ -19,6 +19,14 @@ services:
       - LIBRARIAN_INPUT_PATHS=/project-data/input
       - LIBRARIAN_DB_PATH=/app/priv/data/librarian.db
       - MIX_ENV=prod
+      - ATLASSIAN_1_LABEL=${ATLASSIAN_1_LABEL:-}
+      - ATLASSIAN_1_URL=${ATLASSIAN_1_URL:-}
+      - ATLASSIAN_1_EMAIL=${ATLASSIAN_1_EMAIL:-}
+      - ATLASSIAN_1_TOKEN=${ATLASSIAN_1_TOKEN:-}
+      - ATLASSIAN_2_LABEL=${ATLASSIAN_2_LABEL:-}
+      - ATLASSIAN_2_URL=${ATLASSIAN_2_URL:-}
+      - ATLASSIAN_2_EMAIL=${ATLASSIAN_2_EMAIL:-}
+      - ATLASSIAN_2_TOKEN=${ATLASSIAN_2_TOKEN:-}
     healthcheck:
       test: ["CMD", "/app/scripts/healthcheck.sh"]
       interval: 30s

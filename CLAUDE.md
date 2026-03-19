@@ -112,7 +112,7 @@ For detailed specifications, read the `spec/` folder:
 - **Library definitions** → `spec/LIBRARIES.md` (local only, see `.example`)
 - **Troubleshooting** → `spec/TROUBLESHOOTING.md`
 - **Learnings log** → `spec/LEARNINGS.md`
-- **ADRs** → `.archgate/adrs/` (ARCH-001 through ARCH-006)
+- **ADRs** → `.archgate/adrs/` (ARCH-001 through ARCH-007)
 
 ## Environment Variables
 
@@ -127,3 +127,7 @@ All configuration is in `.env`. See `.env.example` for the full list with descri
 | `LIBRARIAN_DB_PATH` | SQLite index database |
 | `LIBRARIAN_LOG_LEVEL` | Log verbosity |
 | `OPENCLAW_PROVIDER_API_KEY` | AI provider API key |
+| `ATLASSIAN_N_LABEL` | Label for Atlassian account N (e.g., "work") |
+| `ATLASSIAN_N_URL` | Base URL for Atlassian account N |
+| `ATLASSIAN_N_EMAIL` | Email for Atlassian account N |
+| `ATLASSIAN_N_TOKEN` | API token for Atlassian account N |

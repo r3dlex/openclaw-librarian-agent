@@ -42,6 +42,17 @@ The Elixir application provides these services (accessible via Mix tasks or IEx)
 - `Librarian.Reporter` — Daily report generation + backup pruning
 - `Librarian.Archiver` — Weekly compression of processed documents (Sundays at midnight UTC)
 
+## Atlassian Integration (ARCH-007)
+
+On-demand access to Jira, Confluence, and Jira Product Discovery (JPD):
+
+- `Librarian.Atlassian.Client` — HTTP client with Basic auth, automatic pagination, rate limiting, and exponential backoff retry
+- `Librarian.Atlassian.Cache` — Filesystem cache at `$LIBRARIAN_DATA_FOLDER/cache/atlassian/` (default 1h TTL)
+- `Librarian.Atlassian.Jira` — Issue search (JQL), get issue details, comments, changelogs. Also handles JPD ideas (same API)
+- `Librarian.Atlassian.Confluence` — Page fetch, CQL search, space listing. Converts XHTML → markdown via Pandoc
+
+Accounts are configured via numbered env vars (`ATLASSIAN_1_URL`, `ATLASSIAN_1_EMAIL`, `ATLASSIAN_1_TOKEN`, etc.). See `.env.example`.
+
 ## Notifications
 
 Telegram notifications are handled by the Openclaw platform. The Librarian agent itself does not manage notification delivery — all generated content (processed documents, reports, archives, errors) is communicated through Openclaw's built-in notification channels.

@@ -57,6 +57,10 @@ These modules handle repeatable work so you can focus on decisions:
 | `Librarian.Reporter` | Generates daily reports, prunes old backups |
 | `Librarian.Archiver` | Weekly compression of processed documents (Sundays at midnight) |
 | `Librarian.Repo` | Database access layer (SQLite) |
+| `Librarian.Atlassian.Client` | HTTP client for Atlassian APIs (auth, pagination, rate limiting) |
+| `Librarian.Atlassian.Cache` | Filesystem cache for Atlassian responses (1h TTL) |
+| `Librarian.Atlassian.Jira` | Jira + JPD — search issues, get details, convert to markdown |
+| `Librarian.Atlassian.Confluence` | Confluence pages/spaces — fetch and convert XHTML to markdown |
 
 ## Input Processing
 
@@ -101,6 +105,38 @@ Staged items marked "filed" are automatically cleaned up after 24 hours.
 4. **If genuinely different documents** — they belong at different paths (different slugs, dates, or subdirectories). Reclassify rather than appending a version suffix.
 
 The Elixir service also deduplicates at the staging level using SHA-256 checksums — identical content will not be staged twice.
+
+## External Knowledge Sources (ARCH-007)
+
+You can pull content on demand from Jira, Confluence, and Jira Product Discovery (JPD) via the Atlassian modules. Use these when:
+- A document references a Jira issue or Confluence page
+- A task requires context from an external knowledge base
+- You need to enrich vault documents with upstream information
+
+### Usage
+
+```elixir
+# Search Jira (also works for JPD ideas)
+Librarian.Atlassian.Jira.search("project = PROJ ORDER BY updated DESC", account: "work")
+
+# Get a specific issue and convert to markdown
+{:ok, issue} = Librarian.Atlassian.Jira.get_issue("PROJ-123", account: "work")
+{:ok, markdown} = Librarian.Atlassian.Jira.issue_to_markdown(issue)
+
+# Fetch a Confluence page as markdown
+{:ok, page} = Librarian.Atlassian.Confluence.get_page("123456", account: "work")
+{:ok, markdown} = Librarian.Atlassian.Confluence.page_to_markdown(page)
+
+# Search Confluence
+Librarian.Atlassian.Confluence.search("type = page AND title ~ 'architecture'", account: "work")
+
+# List configured accounts
+Librarian.Atlassian.Client.list_accounts()
+```
+
+Results are cached for 1 hour by default. Pass `cache_ttl: seconds` to override.
+
+Multiple Atlassian accounts are supported — specify `account: "label"` to target a specific one. If omitted, the first configured account is used.
 
 ## Libraries
 

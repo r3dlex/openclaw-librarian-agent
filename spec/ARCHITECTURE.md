@@ -15,6 +15,7 @@ Each major decision has a corresponding ADR. Read this document for *what* and *
 | [ARCH-004](/.archgate/adrs/ARCH-004-debounce-strategy.md) | 2-second debounce for Google Drive sync | Accepted |
 | [ARCH-005](/.archgate/adrs/ARCH-005-backup-before-overwrite.md) | Backup before overwrite policy | Accepted |
 | [ARCH-006](/.archgate/adrs/ARCH-006-pipeline-testing.md) | Pipeline-driven testing and validation | Accepted |
+| [ARCH-007](/.archgate/adrs/ARCH-007-atlassian-integration.md) | Atlassian on-demand integration (Jira, Confluence, JPD) | Accepted |
 
 ## Overview
 
@@ -88,6 +89,10 @@ A long-running OTP application inside a Docker container (ARCH-003). Supervised 
 | `Librarian.Reporter` | Daily reports, backup pruning |
 | `Librarian.Archiver` | Weekly compression of processed documents (Sundays midnight UTC) |
 | `Librarian.Repo` | Ecto SQLite3 database access |
+| `Librarian.Atlassian.Client` | HTTP client for Atlassian APIs (auth, pagination, rate limiting) — ARCH-007 |
+| `Librarian.Atlassian.Cache` | Filesystem cache for API responses (`$DATA_FOLDER/cache/atlassian/`) — ARCH-007 |
+| `Librarian.Atlassian.Jira` | Jira + JPD issue search, details, markdown conversion — ARCH-007 |
+| `Librarian.Atlassian.Confluence` | Confluence page/space fetch, XHTML→markdown via Pandoc — ARCH-007 |
 
 ### 3. Pipeline Runner (Python)
 
