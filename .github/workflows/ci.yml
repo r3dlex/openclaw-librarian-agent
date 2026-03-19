@@ -133,11 +133,11 @@ jobs:
             ERRORS=$((ERRORS + 1))
           fi
 
-          # Check for absolute user paths
+          # Check for absolute user paths (exclude this workflow file to avoid self-match)
           if grep -rn '/Users/\|/home/\|/Volumes/' \
             --include='*.md' --include='*.yml' --include='*.yaml' \
             --include='*.ex' --include='*.exs' --include='*.py' \
-            --exclude-dir=.git . ; then
+            --exclude=ci.yml --exclude-dir=.git . ; then
             echo "ERROR: Found absolute user paths in committed files"
             ERRORS=$((ERRORS + 1))
           fi
