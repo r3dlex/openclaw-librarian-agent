@@ -73,7 +73,6 @@ defmodule Librarian.Reporter do
 
     File.write!(report_path, report)
     Logger.info("Daily report generated: #{report_path}")
-    Librarian.Notifier.notify_report(date, report_path)
   end
 
   defp fetch_daily_activity(log_dir, _date) do

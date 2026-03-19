@@ -41,17 +41,10 @@ The Elixir application provides these services (accessible via Mix tasks or IEx)
 - `Librarian.Input` — Multi-folder input monitor (15-minute interval, triggers conversion and staging, moves processed files)
 - `Librarian.Reporter` — Daily report generation + backup pruning
 - `Librarian.Archiver` — Weekly compression of processed documents (Sundays at midnight UTC)
-- `Librarian.Notifier` — Webhook-based notifications (Telegram via n8n) for document processing, reports, archives, and errors
 
 ## Notifications
 
-The Librarian sends notifications on key events via a configurable webhook:
-- **Document processed** — When a file is converted and staged
-- **Daily report** — When the daily report is generated
-- **Weekly archive** — When processed documents are compressed
-- **Errors** — When processing or archiving fails
-
-Configure `LIBRARIAN_NOTIFY_WEBHOOK_URL` to point to an n8n webhook (or any service accepting JSON POST with `{ event, message }`). If unset, notifications are silently skipped.
+Telegram notifications are handled by the Openclaw platform. The Librarian agent itself does not manage notification delivery — all generated content (processed documents, reports, archives, errors) is communicated through Openclaw's built-in notification channels.
 
 ## Container Lifecycle
 

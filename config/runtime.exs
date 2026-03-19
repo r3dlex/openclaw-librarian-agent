@@ -27,6 +27,5 @@ if config_env() == :prod do
     data_folder: primary_data_folder,
     data_folders: data_folders,
     input_paths: input_paths,
-    log_dir: Path.join(primary_data_folder, "log"),
-    notify_webhook_url: System.get_env("LIBRARIAN_NOTIFY_WEBHOOK_URL")
+    log_dir: Path.join(primary_data_folder, "log")
 end

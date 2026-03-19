@@ -87,7 +87,6 @@ A long-running OTP application inside a Docker container (ARCH-003). Supervised 
 | `Librarian.Input` | Multi-folder input monitor (via `LIBRARIAN_INPUT_PATHS`), triggers conversion pipeline |
 | `Librarian.Reporter` | Daily reports, backup pruning |
 | `Librarian.Archiver` | Weekly compression of processed documents (Sundays midnight UTC) |
-| `Librarian.Notifier` | Webhook notifications (Telegram via n8n) on key events |
 | `Librarian.Repo` | Ecto SQLite3 database access |
 
 ### 3. Pipeline Runner (Python)
@@ -196,11 +195,9 @@ The vault is the user-facing output. It must remain:
 
 10. Activity logged to $DATA_FOLDER/log/
 
-11. Librarian.Notifier sends webhook (→ n8n → Telegram)
+11. Staging cleanup (24h retention)
 
-12. Staging cleanup (24h retention)
-
-13. Weekly: Librarian.Archiver compresses processed/ → .tar.gz (+ notification)
+12. Weekly: Librarian.Archiver compresses processed/ → .tar.gz
 ```
 
 ## Data Flow: Vault Change Detection (ARCH-004, ARCH-005)
@@ -237,8 +234,6 @@ The Elixir application performs these checks on startup:
 6. **Backups folder exists** — Creates `$LIBRARIAN_DATA_FOLDER/backups/` if missing.
 7. **Database accessible** — SQLite file exists and migrations are current.
 8. **Pandoc available** — `pandoc --version` succeeds.
-9. **Notification webhook** — If `LIBRARIAN_NOTIFY_WEBHOOK_URL` is set, validates connectivity (optional, non-blocking).
-
 If the vault path or data folder is unavailable (e.g., external drive not mounted), the service logs a warning and enters a degraded mode, retrying every 60 seconds.
 
 ## CI/CD

@@ -127,4 +127,3 @@ All configuration is in `.env`. See `.env.example` for the full list with descri
 | `LIBRARIAN_DB_PATH` | SQLite index database |
 | `LIBRARIAN_LOG_LEVEL` | Log verbosity |
 | `OPENCLAW_PROVIDER_API_KEY` | AI provider API key |
-| `LIBRARIAN_NOTIFY_WEBHOOK_URL` | Webhook URL for notifications (n8n → Telegram) |
