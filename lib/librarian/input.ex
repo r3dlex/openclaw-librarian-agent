@@ -29,8 +29,14 @@ defmodule Librarian.Input do
 
   @impl true
   def handle_info(:check_input, state) do
-    process_all_input_folders()
-    Librarian.Staging.cleanup()
+    try do
+      process_all_input_folders()
+      Librarian.Staging.cleanup()
+    rescue
+      e ->
+        Logger.error("Input processing cycle failed: #{Exception.message(e)}")
+    end
+
     schedule_check()
     {:noreply, state}
   end

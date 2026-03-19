@@ -72,11 +72,10 @@ defmodule Librarian.Staging do
   def mark_filed(id, vault_path) do
     meta_path = Path.join(staging_dir(), "#{id}.meta.json")
 
-    case File.read(meta_path) do
-      {:ok, json} ->
+    case read_metadata(meta_path) do
+      {:ok, existing} ->
         meta =
-          json
-          |> Jason.decode!()
+          existing
           |> Map.merge(%{
             "status" => "filed",
             "vault_path" => vault_path,
@@ -126,14 +125,39 @@ defmodule Librarian.Staging do
       dir
       |> File.ls!()
       |> Enum.filter(&String.ends_with?(&1, ".meta.json"))
-      |> Enum.map(fn file ->
-        Path.join(dir, file)
-        |> File.read!()
-        |> Jason.decode!()
+      |> Enum.flat_map(fn file ->
+        path = Path.join(dir, file)
+
+        case read_metadata(path) do
+          {:ok, meta} ->
+            if meta["status"] == status, do: [meta], else: []
+
+          {:error, reason} ->
+            Logger.warning("Corrupt staging metadata #{file}: #{inspect(reason)}, removing")
+            File.rm(path)
+            md_path = Path.join(dir, String.replace_suffix(file, ".meta.json", ".md"))
+            if File.exists?(md_path), do: File.rm(md_path)
+            []
+        end
       end)
-      |> Enum.filter(&(&1["status"] == status))
     else
       []
+    end
+  end
+
+  defp read_metadata(path) do
+    case File.read(path) do
+      {:ok, content} when content != "" ->
+        case Jason.decode(content) do
+          {:ok, meta} -> {:ok, meta}
+          {:error, reason} -> {:error, reason}
+        end
+
+      {:ok, _empty} ->
+        {:error, :empty_file}
+
+      {:error, reason} ->
+        {:error, reason}
     end
   end
 
