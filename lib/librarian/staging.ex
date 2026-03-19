@@ -36,30 +36,45 @@ defmodule Librarian.Staging do
   """
   require Logger
 
-  @doc "Stage a converted document for agent classification."
+  @doc """
+  Stage a converted document for agent classification.
+
+  Deduplicates by content checksum — if an identical document is already
+  pending in staging, the new one is skipped and the existing ID is returned.
+  """
   def stage(markdown, attrs) do
     staging_dir = staging_dir()
     File.mkdir_p!(staging_dir)
 
-    id = generate_id()
-    md_path = Path.join(staging_dir, "#{id}.md")
-    meta_path = Path.join(staging_dir, "#{id}.meta.json")
+    checksum = :crypto.hash(:sha256, markdown) |> Base.encode16(case: :lower)
 
-    meta = %{
-      id: id,
-      source_file: attrs[:source_file] || "unknown",
-      source_format: attrs[:source_format] || "",
-      converted_at: DateTime.utc_now() |> DateTime.to_iso8601(),
-      byte_size: byte_size(markdown),
-      instructions: attrs[:instructions],
-      status: "pending"
-    }
+    case find_duplicate(staging_dir, checksum) do
+      {:ok, existing_id} ->
+        Logger.info("Skipping duplicate of #{attrs[:source_file]} — already staged as #{existing_id}")
+        {:ok, existing_id}
 
-    File.write!(md_path, markdown)
-    File.write!(meta_path, Jason.encode!(meta, pretty: true))
+      :none ->
+        id = generate_id()
+        md_path = Path.join(staging_dir, "#{id}.md")
+        meta_path = Path.join(staging_dir, "#{id}.meta.json")
 
-    Logger.info("Staged document #{id} from #{meta.source_file}")
-    {:ok, id}
+        meta = %{
+          id: id,
+          source_file: attrs[:source_file] || "unknown",
+          source_format: attrs[:source_format] || "",
+          converted_at: DateTime.utc_now() |> DateTime.to_iso8601(),
+          byte_size: byte_size(markdown),
+          checksum: checksum,
+          instructions: attrs[:instructions],
+          status: "pending"
+        }
+
+        File.write!(md_path, markdown)
+        File.write!(meta_path, Jason.encode!(meta, pretty: true))
+
+        Logger.info("Staged document #{id} from #{meta.source_file}")
+        {:ok, id}
+    end
   end
 
   @doc "List all pending items in the staging folder."
@@ -103,16 +118,112 @@ defmodule Librarian.Staging do
       end
     end)
     |> Enum.each(fn meta ->
-      id = meta["id"]
-      dir = staging_dir()
+      remove_staged_item(meta["id"])
+    end)
+  end
 
-      Enum.each(["#{id}.md", "#{id}.meta.json", "#{id}.source"], fn file ->
-        path = Path.join(dir, file)
-        if File.exists?(path), do: File.rm!(path)
+  @doc """
+  Deep cleanup — runs daily at midnight UTC.
+
+  Removes:
+  1. All filed items (regardless of age)
+  2. Stale pending items older than 48 hours (never classified)
+  3. Orphaned files (`.md` without `.meta.json` or vice versa)
+  """
+  def deep_cleanup do
+    dir = staging_dir()
+
+    unless File.dir?(dir) do
+      Logger.debug("Staging directory not found, skipping deep cleanup")
+    else
+      filed_count = cleanup_all_filed(dir)
+      stale_count = cleanup_stale_pending(dir)
+      orphan_count = cleanup_orphans(dir)
+
+      total = filed_count + stale_count + orphan_count
+
+      if total > 0 do
+        Logger.info(
+          "Staging deep cleanup: #{filed_count} filed, #{stale_count} stale, #{orphan_count} orphaned removed"
+        )
+      else
+        Logger.debug("Staging deep cleanup: nothing to remove")
+      end
+
+      total
+    end
+  end
+
+  defp cleanup_all_filed(dir) do
+    filed = list_by_status(dir, "filed")
+    Enum.each(filed, fn meta -> remove_staged_item(meta["id"]) end)
+    length(filed)
+  end
+
+  defp cleanup_stale_pending(dir) do
+    cutoff = DateTime.utc_now() |> DateTime.add(-48 * 3600)
+
+    stale =
+      dir
+      |> list_by_status("pending")
+      |> Enum.filter(fn meta ->
+        case DateTime.from_iso8601(meta["converted_at"] || "") do
+          {:ok, converted_at, _} -> DateTime.compare(converted_at, cutoff) == :lt
+          _ -> true
+        end
       end)
 
-      Logger.info("Cleaned up staged item #{id}")
+    Enum.each(stale, fn meta ->
+      Logger.warning("Removing stale pending item #{meta["id"]} (source: #{meta["source_file"]})")
+      remove_staged_item(meta["id"])
     end)
+
+    length(stale)
+  end
+
+  defp cleanup_orphans(dir) do
+    all_files = File.ls!(dir) |> Enum.reject(&String.starts_with?(&1, "."))
+
+    meta_ids =
+      all_files
+      |> Enum.filter(&String.ends_with?(&1, ".meta.json"))
+      |> Enum.map(&String.replace_suffix(&1, ".meta.json", ""))
+      |> MapSet.new()
+
+    md_ids =
+      all_files
+      |> Enum.filter(fn f -> String.ends_with?(f, ".md") and not String.ends_with?(f, ".meta.json") end)
+      |> Enum.map(&String.replace_suffix(&1, ".md", ""))
+      |> MapSet.new()
+
+    # Orphaned .md files (no .meta.json)
+    orphaned_mds = MapSet.difference(md_ids, meta_ids)
+    # Orphaned .meta.json files (no .md)
+    orphaned_metas = MapSet.difference(meta_ids, md_ids)
+
+    orphans = MapSet.union(orphaned_mds, orphaned_metas)
+
+    Enum.each(orphans, fn id ->
+      Enum.each(["#{id}.md", "#{id}.meta.json", "#{id}.source"], fn file ->
+        path = Path.join(dir, file)
+        if File.exists?(path), do: File.rm(path)
+      end)
+
+      Logger.info("Removed orphaned staging item #{id}")
+    end)
+
+    MapSet.size(orphans)
+  end
+
+  defp remove_staged_item(id) do
+    dir = staging_dir()
+
+    Enum.each(["#{id}.md", "#{id}.meta.json", "#{id}.source"], fn file ->
+      path = Path.join(dir, file)
+      if File.exists?(path), do: File.rm!(path)
+    end)
+
+    Logger.info("Cleaned up staged item #{id}")
   end
 
   defp staging_dir do
@@ -159,6 +270,25 @@ defmodule Librarian.Staging do
       {:error, reason} ->
         {:error, reason}
     end
+  end
+
+  defp find_duplicate(staging_dir, checksum) do
+    staging_dir
+    |> File.ls!()
+    |> Enum.filter(&String.ends_with?(&1, ".meta.json"))
+    |> Enum.find_value(:none, fn file ->
+      path = Path.join(staging_dir, file)
+
+      case read_metadata(path) do
+        {:ok, meta} ->
+          if meta["checksum"] == checksum and meta["status"] == "pending" do
+            {:ok, meta["id"]}
+          end
+
+        _ ->
+          nil
+      end
+    end)
   end
 
   defp generate_id do

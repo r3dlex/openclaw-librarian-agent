@@ -83,12 +83,24 @@ Check the staging folder for pending items. For each:
 1. Read the `.md` content and `.meta.json` metadata (includes source filename and user instructions).
 2. Classify: determine the target library, document type, tags, and relationships.
 3. Add YAML front matter per `spec/STRUCTURE.md`.
-4. Write the final document to the correct vault location.
-5. Call `Librarian.Staging.mark_filed(id, vault_path)` to mark it done.
-6. Update the index and relationship graph.
-7. Log your classification reasoning.
+4. **Check for existing file** at the target vault path (see § Deduplication below).
+5. Write the final document to the correct vault location.
+6. Call `Librarian.Staging.mark_filed(id, vault_path)` to mark it done.
+7. Update the index and relationship graph.
+8. Log your classification reasoning.
 
 Staged items marked "filed" are automatically cleaned up after 24 hours.
+
+### Deduplication
+
+**Never create `-v2`, `-copy`, or numbered duplicates.** When the target vault path already exists:
+
+1. **Compare body content** (ignore YAML front matter differences).
+2. **If identical** — skip the new file. Mark it as filed pointing to the existing path.
+3. **If the new version has additional content** — merge the new content into the existing file, preserving the existing front matter. Update timestamps.
+4. **If genuinely different documents** — they belong at different paths (different slugs, dates, or subdirectories). Reclassify rather than appending a version suffix.
+
+The Elixir service also deduplicates at the staging level using SHA-256 checksums — identical content will not be staged twice.
 
 ## Libraries
 

@@ -28,6 +28,7 @@ defmodule Librarian.Reporter do
       if state.last_report_date != today do
         generate_daily_report(today)
         Librarian.Vault.Backup.prune()
+        Librarian.Staging.deep_cleanup()
         %{state | last_report_date: today}
       else
         state

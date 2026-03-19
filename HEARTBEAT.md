@@ -10,10 +10,11 @@ Periodic tasks for the Librarian. Each task runs on the specified interval.
 ## Every hour
 - Scan the vault for filesystem changes. Reprocess modified files and update the index.
 
-## Daily (end of day)
+## Daily (midnight UTC)
 - Generate the daily report: documents processed, where they landed, any issues encountered.
 - Write the report to `$LIBRARIAN_DATA_FOLDER/log/reports/YYYY-MM-DD.md`.
 - Prune backups older than 30 days from `$LIBRARIAN_DATA_FOLDER/backups/`.
+- **Deep staging cleanup** (`Librarian.Staging.deep_cleanup/0`): remove all filed items, stale pending items (>48h), and orphaned files.
 - Update `spec/LEARNINGS.md` if new patterns or issues were discovered.
 
 ## Weekly (Sunday midnight UTC)
