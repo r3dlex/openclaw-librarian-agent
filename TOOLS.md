@@ -8,7 +8,8 @@ Skills define *how* tools work. This file captures *your* setup.
 All paths are configured via environment variables in `.env`:
 
 - **Vault**: `$LIBRARIAN_VAULT_PATH` — The Obsidian vault root. All organized documents live here.
-- **Data folders**: `$LIBRARIAN_DATA_FOLDER` — Comma-separated list of data folder paths. First is primary (staging, log, backups, DB). Each gets `input/` and `processed/` directories.
+- **Primary data folder**: `$LIBRARIAN_PRIMARY_DATA_FOLDER` — Single host path for Docker volume mount. This is where staging, log, backups, and DB live.
+- **Data folders**: `$LIBRARIAN_DATA_FOLDER` — Comma-separated list of data folder paths. First is primary. Each gets `input/` and `processed/` directories.
 - **Input paths**: `$LIBRARIAN_INPUT_PATHS` — Comma-separated list of additional input folders. `$LIBRARIAN_DATA_FOLDER/input` is always included.
 - **Database**: `$LIBRARIAN_DB_PATH` — SQLite index. Defaults to `$LIBRARIAN_DATA_FOLDER/librarian.db`.
 - **Log directory**: `$LIBRARIAN_DATA_FOLDER/log/` — Centralized log output for all events, reports, and processing activity.

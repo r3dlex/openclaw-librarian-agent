@@ -20,7 +20,7 @@ defmodule Librarian.Notifier do
   """
   def notify(event, message) do
     case webhook_url() do
-      nil ->
+      url when url in [nil, ""] ->
         Logger.debug("Notifier: no webhook URL configured, skipping notification")
         :ok
 

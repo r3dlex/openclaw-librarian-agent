@@ -121,6 +121,7 @@ All configuration is in `.env`. See `.env.example` for the full list with descri
 | Variable | Purpose |
 |----------|---------|
 | `LIBRARIAN_VAULT_PATH` | Obsidian vault location |
+| `LIBRARIAN_PRIMARY_DATA_FOLDER` | Single host path to primary data folder (used for Docker volume mount) |
 | `LIBRARIAN_DATA_FOLDER` | Comma-separated data folders (input/, staging/, log/, backups/, processed/) |
 | `LIBRARIAN_INPUT_PATHS` | Comma-separated additional input folders |
 | `LIBRARIAN_DB_PATH` | SQLite index database |

@@ -21,7 +21,9 @@ defmodule Librarian.Input do
 
   @impl true
   def init(:ok) do
-    schedule_check()
+    ensure_directories()
+    # Process existing files immediately on startup, then schedule periodic checks
+    send(self(), :check_input)
     {:ok, %{}}
   end
 
@@ -46,6 +48,20 @@ defmodule Librarian.Input do
 
   defp schedule_check do
     Process.send_after(self(), :check_input, @check_interval_ms)
+  end
+
+  defp ensure_directories do
+    data_folders = Application.get_env(:librarian, :data_folders, [])
+
+    Enum.each(data_folders, fn df ->
+      Enum.each(~w(input staging processed log backups), fn sub ->
+        dir = Path.join(df, sub)
+        File.mkdir_p!(dir)
+      end)
+    end)
+
+    log_dir = Application.get_env(:librarian, :log_dir, "")
+    if log_dir != "", do: File.mkdir_p!(Path.join(log_dir, "reports"))
   end
 
   defp input_paths do

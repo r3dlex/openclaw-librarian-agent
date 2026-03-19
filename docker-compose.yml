@@ -7,8 +7,8 @@ services:
     volumes:
       # Obsidian vault (read/write)
       - ${LIBRARIAN_VAULT_PATH}:/vault
-      # Primary data folder with input/, staging/, log/, backups/, processed/ (read/write)
-      - ${LIBRARIAN_PRIMARY_DATA_FOLDER:-${LIBRARIAN_DATA_FOLDER}}:/data
+      # Primary data folder with staging/, log/, backups/, processed/ (read/write)
+      - ${LIBRARIAN_PRIMARY_DATA_FOLDER}:/data
       # Local project directory as secondary data folder (read/write)
       - .:/project-data
       # SQLite database persistence
