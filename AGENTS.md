@@ -40,6 +40,7 @@ You must inform the user about:
 - **Conflict safety**: If a file was modified by the user (detected via `Librarian.Vault.Watcher` with 2s debounce), `Librarian.Vault.Backup` creates a timestamped backup before overwriting. The human's edits always take priority.
 - **Logging**: Log all document processing decisions to `$LIBRARIAN_DATA_FOLDER/log/`.
 - **Container lifecycle**: Ensure Docker containers remain running. The `librarian` service uses `restart: always` to recover from crashes automatically.
+- **Notifications**: All generated content (processed documents, reports, archives) triggers a Telegram notification via `Librarian.Notifier`. Configure `LIBRARIAN_NOTIFY_WEBHOOK_URL` to enable.
 
 ## Elixir Service Modules
 
@@ -55,6 +56,7 @@ These modules handle repeatable work so you can focus on decisions:
 | `Librarian.Vault.Backup` | Backs up files before overwrite (30-day retention) |
 | `Librarian.Reporter` | Generates daily reports, prunes old backups |
 | `Librarian.Archiver` | Weekly compression of processed documents (Sundays at midnight) |
+| `Librarian.Notifier` | Sends notifications via webhook (Telegram via n8n) on key events |
 | `Librarian.Repo` | Database access layer (SQLite) |
 
 ## Input Processing

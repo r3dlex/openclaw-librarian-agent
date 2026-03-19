@@ -25,7 +25,8 @@ defmodule Librarian.MixProject do
       {:ecto_sqlite3, "~> 0.17"},
       {:file_system, "~> 1.0"},
       {:jason, "~> 1.4"},
-      {:yaml_elixir, "~> 2.11"}
+      {:yaml_elixir, "~> 2.11"},
+      {:req, "~> 0.5"}
     ]
   end
 

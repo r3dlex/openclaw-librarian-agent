@@ -106,6 +106,7 @@ defmodule Librarian.Input do
           })
 
         log_processing(path, :ok, id)
+        Librarian.Notifier.notify_processed(Path.basename(path), id)
 
         # Move source and companion to processed/
         move_to_processed(path)
@@ -117,6 +118,7 @@ defmodule Librarian.Input do
       {:error, reason} ->
         Logger.error("Failed to process #{path}: #{reason}")
         log_processing(path, {:error, reason}, nil)
+        Librarian.Notifier.notify_error("Processing #{Path.basename(path)}", reason)
     end
   end
 

@@ -96,9 +96,11 @@ defmodule Librarian.Archiver do
 
           Logger.info("Archive created: #{archive_path}")
           log_archive(processed_dir, archive_name, length(files))
+          Librarian.Notifier.notify_archive(archive_name, length(files), processed_dir)
 
         {output, code} ->
           Logger.error("Archive failed (exit #{code}): #{output}")
+          Librarian.Notifier.notify_error("Archive in #{processed_dir}", "exit #{code}: #{output}")
       end
     end
   end

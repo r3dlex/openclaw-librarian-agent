@@ -18,6 +18,7 @@ services:
       - LIBRARIAN_DATA_FOLDER=/data,/project-data
       - LIBRARIAN_INPUT_PATHS=/project-data/input
       - LIBRARIAN_DB_PATH=/app/priv/data/librarian.db
+      - LIBRARIAN_NOTIFY_WEBHOOK_URL=${LIBRARIAN_NOTIFY_WEBHOOK_URL:-}
       - MIX_ENV=prod
     healthcheck:
       test: ["CMD", "/app/scripts/healthcheck.sh"]

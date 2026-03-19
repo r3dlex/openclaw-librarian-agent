@@ -76,7 +76,7 @@ poetry run ruff check .
 
 | Change | Required tests |
 |--------|---------------|
-| New Elixir module | Unit test in `test/` |
+| New Elixir module (e.g., Notifier) | Unit test in `test/` |
 | New pipeline | CLI help test + functional test in `tests/test_pipelines.py` |
 | New ADR | Frontmatter validated automatically by `TestADRFrontmatter` |
 | Schema migration | Integration test verifying the migration runs |
