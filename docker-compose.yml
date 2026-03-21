@@ -11,6 +11,8 @@ services:
       - ${LIBRARIAN_PRIMARY_DATA_FOLDER}:/data
       # Local project directory as secondary data folder (read/write)
       - .:/project-data
+      # IAMQ file-based queue (fallback when HTTP unreachable)
+      - ${IAMQ_QUEUE_PATH:-./queue}:/iamq-queue
       # SQLite database persistence
       - librarian-db:/app/priv/data
     environment:
@@ -28,6 +30,7 @@ services:
       - ATLASSIAN_2_EMAIL=${ATLASSIAN_2_EMAIL:-}
       - ATLASSIAN_2_TOKEN=${ATLASSIAN_2_TOKEN:-}
       - IAMQ_URL=${IAMQ_URL:-http://host.docker.internal:18790}
+      - IAMQ_QUEUE_PATH=/iamq-queue
       - LIBRARIAN_WORKSPACE_PATH=${LIBRARIAN_WORKSPACE_PATH:-}
     healthcheck:
       test: ["CMD", "/app/scripts/healthcheck.sh"]
