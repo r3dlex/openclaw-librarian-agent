@@ -14,8 +14,8 @@ defmodule Librarian.IAMQ do
 
   # ── Public API ──
 
-  def start_link(_opts) do
-    GenServer.start_link(__MODULE__, :ok, name: __MODULE__)
+  def start_link(opts \\ []) do
+    GenServer.start_link(__MODULE__, opts, name: Keyword.get(opts, :name, __MODULE__))
   end
 
   @doc "Send a message to another agent via IAMQ."
@@ -36,17 +36,22 @@ defmodule Librarian.IAMQ do
   # ── GenServer callbacks ──
 
   @impl true
-  def init(:ok) do
-    base_url = Application.get_env(:librarian, :iamq_url, "http://127.0.0.1:18790")
+  def init(opts) when is_list(opts) do
+    base_url = Keyword.get(opts, :base_url, Application.get_env(:librarian, :iamq_url, "http://127.0.0.1:18790"))
 
     state = %{
       base_url: base_url,
       registered: false
     }
 
-    send(self(), :register)
+    unless Keyword.get(opts, :auto_register) == false do
+      send(self(), :register)
+    end
+
     {:ok, state}
   end
+
+  def init(:ok), do: init([])
 
   @impl true
   def handle_call({:send, to, subject, body, opts}, _from, state) do

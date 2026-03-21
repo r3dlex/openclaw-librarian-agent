@@ -26,7 +26,8 @@ defmodule Librarian.MixProject do
       {:file_system, "~> 1.0"},
       {:jason, "~> 1.4"},
       {:req, "~> 0.5"},
-      {:yaml_elixir, "~> 2.11"}
+      {:yaml_elixir, "~> 2.11"},
+      {:bypass, "~> 2.1", only: :test}
     ]
   end
 
