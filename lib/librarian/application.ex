@@ -2,7 +2,7 @@ defmodule Librarian.Application do
   @moduledoc """
   OTP Application for the Librarian agent.
 
-  Supervises: Repo, Vault.Watcher, Input monitor, Reporter, and Archiver.
+  Supervises: Repo, Vault.Watcher, Input monitor, Reporter, Archiver, and IAMQ.
   """
   use Application
 
