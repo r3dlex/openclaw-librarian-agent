@@ -77,7 +77,16 @@ defmodule Librarian.IAMQ do
 
   @impl true
   def handle_info(:register, state) do
-    case post(state.base_url, "/register", %{agent_id: @agent_id}) do
+    registration = %{
+      agent_id: @agent_id,
+      name: "Librarian",
+      emoji: "📚",
+      description: "Document archivist and knowledge organizer — search, summarize, archive",
+      capabilities: ["search", "summarize", "archive", "knowledge_management"],
+      workspace: Application.get_env(:librarian, :workspace_path, "")
+    }
+
+    case post(state.base_url, "/register", registration) do
       {:ok, _} ->
         Logger.info("IAMQ: registered as #{@agent_id}")
         schedule(:heartbeat, @heartbeat_interval)
