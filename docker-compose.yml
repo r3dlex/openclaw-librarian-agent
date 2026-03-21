@@ -29,7 +29,7 @@ services:
       - ATLASSIAN_2_URL=${ATLASSIAN_2_URL:-}
       - ATLASSIAN_2_EMAIL=${ATLASSIAN_2_EMAIL:-}
       - ATLASSIAN_2_TOKEN=${ATLASSIAN_2_TOKEN:-}
-      - IAMQ_URL=${IAMQ_URL:-http://host.docker.internal:18790}
+      - IAMQ_URL=http://host.docker.internal:18790
       - IAMQ_QUEUE_PATH=/iamq-queue
       - LIBRARIAN_WORKSPACE_PATH=${LIBRARIAN_WORKSPACE_PATH:-}
     healthcheck:
