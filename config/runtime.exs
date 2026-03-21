@@ -51,5 +51,6 @@ if config_env() == :prod do
     data_folders: data_folders,
     input_paths: input_paths,
     log_dir: Path.join(primary_data_folder, "log"),
-    atlassian_accounts: atlassian_accounts
+    atlassian_accounts: atlassian_accounts,
+    iamq_url: System.get_env("IAMQ_URL", "http://127.0.0.1:18790")
 end

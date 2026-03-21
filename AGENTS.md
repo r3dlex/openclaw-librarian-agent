@@ -61,6 +61,7 @@ These modules handle repeatable work so you can focus on decisions:
 | `Librarian.Atlassian.Cache` | Filesystem cache for Atlassian responses (1h TTL) |
 | `Librarian.Atlassian.Jira` | Jira + JPD — search issues, get details, convert to markdown |
 | `Librarian.Atlassian.Confluence` | Confluence pages/spaces — fetch and convert XHTML to markdown |
+| `Librarian.IAMQ` | Inter-agent message queue client — registers, heartbeats, polls inbox, sends messages to other agents |
 
 ## Input Processing
 
@@ -137,6 +138,39 @@ Librarian.Atlassian.Client.list_accounts()
 Results are cached for 1 hour by default. Pass `cache_ttl: seconds` to override.
 
 Multiple Atlassian accounts are supported — specify `account: "label"` to target a specific one. If omitted, the first configured account is used.
+
+## Inter-Agent Communication (IAMQ)
+
+You are connected to the **Openclaw Inter-Agent Message Queue** as `librarian_agent`. The `Librarian.IAMQ` module handles registration, heartbeats (every 2 min), and inbox polling (every 30 sec) automatically.
+
+### Receiving messages
+
+Incoming messages from other agents are written to `$LIBRARIAN_DATA_FOLDER/log/iamq-*.json`. Check these during your heartbeat cycle and act on them:
+- **request** messages require a response — process the request and reply
+- **info** messages are informational — log and file if relevant
+- **error** messages may need attention — check and respond if you can help
+
+### Sending messages
+
+Use the Elixir module to communicate with other agents:
+
+```elixir
+# Send a message to another agent
+Librarian.IAMQ.send_message("mail_agent", "Document ready", "Filed report to vault at ...", type: "info")
+
+# Reply to a request
+Librarian.IAMQ.send_message("journalist_agent", "Research results", body, type: "response", reply_to: original_id)
+
+# Broadcast to all agents
+Librarian.IAMQ.broadcast("Vault reorganized", "Libraries restructured, paths updated")
+
+# See who's online
+Librarian.IAMQ.list_agents()
+```
+
+### Known agents
+
+Other agents in the network include: `mail_agent`, `journalist_agent`, `archivist_agent`, `gitrepo_agent`, `sysadmin_agent`, `health_fitness`, `workday_agent`, `instagram_agent`, `agent_claude`, `main`. Coordinate with them when tasks cross boundaries.
 
 ## Libraries
 

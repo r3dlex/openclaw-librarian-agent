@@ -53,6 +53,15 @@ On-demand access to Jira, Confluence, and Jira Product Discovery (JPD):
 
 Accounts are configured via numbered env vars (`ATLASSIAN_1_URL`, `ATLASSIAN_1_EMAIL`, `ATLASSIAN_1_TOKEN`, etc.). See `.env.example`.
 
+## Inter-Agent Message Queue (IAMQ)
+
+The Librarian connects to the Openclaw IAMQ service (`$IAMQ_URL`) as `librarian_agent`:
+
+- `Librarian.IAMQ` — GenServer that registers on startup, heartbeats every 2 min, polls inbox every 30 sec
+- Incoming messages are logged to `$LIBRARIAN_DATA_FOLDER/log/iamq-*.json`
+- Send messages via `Librarian.IAMQ.send_message/4` or `Librarian.IAMQ.broadcast/3`
+- Uses HTTP REST API (port 18790) — no WebSocket dependency
+
 ## Notifications
 
 Telegram notifications are handled by the Openclaw platform. The Librarian agent itself does not manage notification delivery — all generated content (processed documents, reports, archives, errors) is communicated through Openclaw's built-in notification channels.

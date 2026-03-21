@@ -131,3 +131,4 @@ All configuration is in `.env`. See `.env.example` for the full list with descri
 | `ATLASSIAN_N_URL` | Base URL for Atlassian account N |
 | `ATLASSIAN_N_EMAIL` | Email for Atlassian account N |
 | `ATLASSIAN_N_TOKEN` | API token for Atlassian account N |
+| `IAMQ_URL` | Inter-Agent Message Queue URL (default: `http://127.0.0.1:18790`) |

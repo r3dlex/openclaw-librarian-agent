@@ -27,6 +27,7 @@ services:
       - ATLASSIAN_2_URL=${ATLASSIAN_2_URL:-}
       - ATLASSIAN_2_EMAIL=${ATLASSIAN_2_EMAIL:-}
       - ATLASSIAN_2_TOKEN=${ATLASSIAN_2_TOKEN:-}
+      - IAMQ_URL=${IAMQ_URL:-http://host.docker.internal:18790}
     healthcheck:
       test: ["CMD", "/app/scripts/healthcheck.sh"]
       interval: 30s
