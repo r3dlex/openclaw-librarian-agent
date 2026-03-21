@@ -62,6 +62,7 @@ dist/
 # ---- Openclaw Runtime ----
 .openclaw/
 USER.md
+/inbox/
 
 # ---- Input folder contents ----
 /input/*

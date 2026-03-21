@@ -55,12 +55,13 @@ Accounts are configured via numbered env vars (`ATLASSIAN_1_URL`, `ATLASSIAN_1_E
 
 ## Inter-Agent Message Queue (IAMQ)
 
-The Librarian connects to the Openclaw IAMQ service (`$IAMQ_URL`) as `librarian_agent`:
+The Librarian connects to the Openclaw IAMQ service as `librarian_agent`:
 
 - `Librarian.IAMQ` — GenServer that registers on startup, heartbeats every 2 min, polls inbox every 30 sec
+- **Dual-mode**: tries HTTP API (`$IAMQ_URL`, default port 18790) first, falls back to file-based queue (`$IAMQ_QUEUE_PATH`)
 - Incoming messages are logged to `$LIBRARIAN_DATA_FOLDER/log/iamq-*.json`
 - Send messages via `Librarian.IAMQ.send_message/4` or `Librarian.IAMQ.broadcast/3`
-- Uses HTTP REST API (port 18790) — no WebSocket dependency
+- **Workspace inbox**: other agents may also write messages directly to `inbox/` in this workspace — check during heartbeat
 
 ## Notifications
 

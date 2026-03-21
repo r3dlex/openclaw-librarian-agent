@@ -15,7 +15,8 @@ Periodic tasks for the Librarian. Each task runs on the specified interval.
 - `Librarian.IAMQ` polls inbox for new messages from other agents. Incoming messages are saved to `$LIBRARIAN_DATA_FOLDER/log/iamq-*.json`.
 
 ## Every hour
-- **Check IAMQ inbox logs** — review any messages received from other agents and act on requests.
+- **Check IAMQ inbox logs** — review any messages received from other agents in `$LIBRARIAN_DATA_FOLDER/log/iamq-*.json` and act on requests.
+- **Check workspace inbox** — process any messages in `inbox/` written directly by other agents. Delete or archive after acting.
 - **Classify and file all pending staged items** (Stage 2 of the pipeline). For each item with status "pending" in `$LIBRARIAN_DATA_FOLDER/staging/`:
   1. Read the `.md` content and `.meta.json` metadata.
   2. Classify: determine target library, document type, tags, relationships.
