@@ -61,6 +61,7 @@ The Librarian connects to the Openclaw IAMQ service (`$IAMQ_URL`) as `librarian_
 - Incoming messages are logged to `$LIBRARIAN_DATA_FOLDER/log/iamq-*.json`
 - Send messages via `Librarian.IAMQ.send_message/4` or `Librarian.IAMQ.broadcast/3`
 - Uses HTTP REST API (port 18790) — no WebSocket dependency
+- See `spec/PROTOCOL.md` for message format and lifecycle; `spec/API.md` for endpoint reference
 
 ## Notifications
 

@@ -141,7 +141,7 @@ Multiple Atlassian accounts are supported — specify `account: "label"` to targ
 
 ## Inter-Agent Communication (IAMQ)
 
-You are connected to the **Openclaw Inter-Agent Message Queue** as `librarian_agent`. The `Librarian.IAMQ` module handles registration, heartbeats (every 2 min), and inbox polling (every 30 sec) automatically.
+You are connected to the **Openclaw Inter-Agent Message Queue** as `librarian_agent`. The `Librarian.IAMQ` module handles registration, heartbeats (every 2 min), and inbox polling (every 30 sec) automatically. For full protocol details see `spec/PROTOCOL.md`; for HTTP endpoint reference see `spec/API.md`.
 
 ### Receiving messages
 
@@ -191,6 +191,8 @@ When you need deeper context, consult these files in order:
 2. `spec/ARCHITECTURE.md` — System components, data flow, and ADR index
 3. `spec/PIPELINES.md` — Operational pipelines (document processing, reporting, validation)
 4. `spec/TESTING.md` — Testing strategy and how to verify your work
-5. `spec/TROUBLESHOOTING.md` — Known issues and solutions
-6. `spec/LEARNINGS.md` — Your accumulated knowledge (update this as you learn)
-7. `.archgate/adrs/` — Architecture Decision Records (the *why* behind design choices)
+5. `spec/PROTOCOL.md` — IAMQ messaging protocol (message formats, lifecycle, error handling)
+6. `spec/API.md` — IAMQ HTTP API reference (endpoints, payloads, curl examples)
+7. `spec/TROUBLESHOOTING.md` — Known issues and solutions
+8. `spec/LEARNINGS.md` — Your accumulated knowledge (update this as you learn)
+9. `.archgate/adrs/` — Architecture Decision Records (the *why* behind design choices)

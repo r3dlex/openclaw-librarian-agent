@@ -88,6 +88,7 @@ A long-running OTP application inside a Docker container (ARCH-003). Supervised 
 | `Librarian.Input` | Multi-folder input monitor (via `LIBRARIAN_INPUT_PATHS`), triggers conversion pipeline |
 | `Librarian.Reporter` | Daily reports, backup pruning |
 | `Librarian.Archiver` | Weekly compression of processed documents (Sundays midnight UTC) |
+| `Librarian.IAMQ` | Inter-agent message queue client — registration, heartbeats, inbox polling (see `spec/PROTOCOL.md`, `spec/API.md`) |
 | `Librarian.Repo` | Ecto SQLite3 database access |
 | `Librarian.Atlassian.Client` | HTTP client for Atlassian APIs (auth, pagination, rate limiting) — ARCH-007 |
 | `Librarian.Atlassian.Cache` | Filesystem cache for API responses (`$DATA_FOLDER/cache/atlassian/`) — ARCH-007 |
@@ -248,6 +249,8 @@ GitHub Actions runs on every push/PR to `main`. See `.github/workflows/ci.yml` f
 ## Related
 
 - `spec/PIPELINES.md` — Pipeline definitions and usage
+- `spec/PROTOCOL.md` — IAMQ messaging protocol
+- `spec/API.md` — IAMQ HTTP API reference
 - `spec/TESTING.md` — Testing strategy
 - `spec/STRUCTURE.md` — Document organization rules
 - `.archgate/adrs/` — Architecture Decision Records

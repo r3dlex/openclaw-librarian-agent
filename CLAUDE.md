@@ -28,6 +28,8 @@ This repo defines **the Librarian**, an openclaw agent that organizes, summarize
 │   ├── STRUCTURE.md          # Document organization rules
 │   ├── PIPELINES.md          # Pipeline definitions and usage
 │   ├── TESTING.md            # Testing strategy and instructions
+│   ├── PROTOCOL.md           # IAMQ messaging protocol spec
+│   ├── API.md                # IAMQ HTTP API reference
 │   ├── LIBRARIES.md.example  # Library definitions template
 │   ├── TROUBLESHOOTING.md    # Known issues and fixes
 │   └── LEARNINGS.md          # Accumulated agent learnings
@@ -107,6 +109,8 @@ For detailed specifications, read the `spec/` folder:
 
 - **Architecture & data flow** → `spec/ARCHITECTURE.md` (references ADRs in `.archgate/adrs/`)
 - **Pipelines** → `spec/PIPELINES.md`
+- **IAMQ protocol** → `spec/PROTOCOL.md` (message format, lifecycle, error handling)
+- **IAMQ API** → `spec/API.md` (HTTP endpoints, payloads, curl examples)
 - **Testing strategy** → `spec/TESTING.md`
 - **Document organization rules** → `spec/STRUCTURE.md`
 - **Library definitions** → `spec/LIBRARIES.md` (local only, see `.example`)
