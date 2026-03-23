@@ -26,6 +26,7 @@ defmodule Librarian.MixProject do
       {:file_system, "~> 1.0"},
       {:jason, "~> 1.4"},
       {:req, "~> 0.5"},
+      {:websockex, "~> 0.5"},
       {:yaml_elixir, "~> 2.11"}
     ]
   end
