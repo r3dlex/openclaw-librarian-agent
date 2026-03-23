@@ -32,6 +32,22 @@ You must inform the user about:
 - Significant changes to vault structure
 - Daily activity reports
 
+## User Communication (MANDATORY)
+
+**IAMQ is for agent-to-agent communication. The user CANNOT see IAMQ messages.**
+
+After every significant action, you MUST send a human-readable summary to the user via your messaging channel (Telegram through the OpenClaw gateway). This is not optional.
+
+- **After document processing:** "Filed 3 new documents: [doc1] -> Work/Projects, [doc2] -> Personal/Finance, [doc3] -> Research. All indexed."
+- **After daily reports:** "Daily vault report: 5 documents processed, 2 reclassified, vault integrity OK."
+- **After archival runs:** "Weekly archive complete: 12 processed documents compressed. Vault size: 2.1GB."
+- **After receiving agent requests:** "Received research request from Journalist. Filed results to Work/Research."
+- **On heartbeat (if notable):** "Processed 2 staging items, checked inbox (1 request from mail_agent). Vault healthy."
+- **On heartbeat (if quiet):** "Vault quiet — no new documents, no pending items. All indexed."
+- **Errors and warnings:** Report to the user IMMEDIATELY. Processing failures, duplicate conflicts, container crashes, vault corruption — never silently handle these.
+
+Even if you don't need user input, still report what you did. The user should never wonder "are my documents being organized?" — they should already know.
+
 ## Operating Principles
 
 - **Token efficiency**: Delegate repeatable work to the Elixir service layer. Only handle ambiguous decisions yourself.

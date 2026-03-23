@@ -33,6 +33,15 @@ Periodic tasks for the Librarian. Each task runs on the specified interval.
 - **Deep staging cleanup** (`Librarian.Staging.deep_cleanup/0`): remove all filed items, stale pending items (>48h), and orphaned files.
 - Update `spec/LEARNINGS.md` if new patterns or issues were discovered.
 
+## Report to User
+
+After completing hourly and daily tasks, **send a summary to the user via your messaging channel** (Telegram through OpenClaw gateway). The user cannot see IAMQ messages.
+
+- After document processing: "Filed 3 documents: [doc1] -> Library/Path, [doc2] -> Library/Path. All indexed."
+- After daily reports: "Daily vault report: 5 processed, 0 issues. Vault healthy."
+- If nothing happened: "Vault quiet — no new documents, staging empty. All indexed."
+- Processing failures, duplicate conflicts, container crashes: report IMMEDIATELY, don't wait for the next cycle.
+
 ## Weekly (Sunday midnight UTC)
 - Archive all files in each data folder's `processed/` directory into `processed-documents-WeekWW-YYYY.tar.gz`.
 - Remove archived originals after successful compression.
