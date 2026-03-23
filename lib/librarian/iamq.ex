@@ -82,10 +82,10 @@ defmodule Librarian.IAMQ do
   def handle_info(:register, state) do
     registration = %{
       agent_id: @agent_id,
-      name: "Librarian",
-      emoji: "📚",
-      description: "Document archivist and knowledge organizer — search, summarize, archive",
-      capabilities: ["search", "summarize", "archive", "knowledge_management"],
+      name: System.get_env("IAMQ_AGENT_NAME", "Librarian"),
+      emoji: System.get_env("IAMQ_AGENT_EMOJI", "📚"),
+      description: System.get_env("IAMQ_AGENT_DESC", "Document archivist and knowledge organizer — search, summarize, archive"),
+      capabilities: parse_caps(System.get_env("IAMQ_AGENT_CAPABILITIES", "search,summarize,archive,knowledge_management")),
       workspace: Application.get_env(:librarian, :workspace_path, "")
     }
 
@@ -361,6 +361,10 @@ defmodule Librarian.IAMQ do
       {:error, exception} ->
         {:error, exception}
     end
+  end
+
+  defp parse_caps(s) do
+    s |> String.split(",") |> Enum.map(&String.trim/1) |> Enum.reject(&(&1 == ""))
   end
 
   defp schedule(message, interval) do
