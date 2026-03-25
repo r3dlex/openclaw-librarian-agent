@@ -22,8 +22,13 @@ Periodic tasks for the Librarian. Each task runs on the specified interval.
   2. Classify: determine target library, document type, tags, relationships.
   3. Add YAML front matter per `spec/STRUCTURE.md`.
   4. Check for duplicates at the target path (see § Deduplication in `AGENTS.md`).
-  5. Write to vault. Call `Librarian.Staging.mark_filed(id, vault_path)`.
+  5. Write to vault **first**, then call `Librarian.Staging.mark_filed(id, vault_path)`. Never call `mark_filed` without a vault_path — this creates orphans.
   6. Update index and relationship graph. Log reasoning.
+- **Detect orphaned filed items** — scan staging for items where `status: "filed"` but `vault_path` is null. For each orphan:
+  1. Check if the content already exists in the vault (compare checksums).
+  2. If found: update the `.meta.json` with the correct `vault_path`.
+  3. If not found: re-classify and file to vault, then call `mark_filed(id, vault_path)`.
+  4. Report orphan count in the next Telegram summary.
 - Scan the vault for filesystem changes. Reprocess modified files and update the index.
 
 ## Daily (midnight UTC)
