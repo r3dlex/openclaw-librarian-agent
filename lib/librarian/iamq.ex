@@ -9,10 +9,6 @@ defmodule Librarian.IAMQ do
   import Bitwise
   require Logger
 
-  @agent_id "librarian_agent"
-  @heartbeat_interval :timer.minutes(2)
-  @poll_interval :timer.seconds(30)
-
   # ── Public API ──
 
   def start_link(_opts) do
@@ -40,10 +36,26 @@ defmodule Librarian.IAMQ do
   def init(:ok) do
     base_url = Application.get_env(:librarian, :iamq_url, "http://127.0.0.1:18790")
     queue_path = Application.get_env(:librarian, :iamq_queue_path, "")
+    agent_id = Application.get_env(:librarian, :iamq_agent_id, "librarian_agent")
+
+    heartbeat_ms =
+      case System.get_env("IAMQ_HEARTBEAT_MS") do
+        nil -> :timer.minutes(5)
+        val -> String.to_integer(val)
+      end
+
+    poll_ms =
+      case System.get_env("IAMQ_POLL_MS") do
+        nil -> :timer.seconds(60)
+        val -> String.to_integer(val)
+      end
 
     state = %{
       base_url: base_url,
       queue_path: queue_path,
+      agent_id: agent_id,
+      heartbeat_ms: heartbeat_ms,
+      poll_ms: poll_ms,
       mode: nil,
       registered: false
     }
@@ -81,7 +93,7 @@ defmodule Librarian.IAMQ do
   @impl true
   def handle_info(:register, state) do
     registration = %{
-      agent_id: @agent_id,
+      agent_id: state.agent_id,
       name: System.get_env("IAMQ_AGENT_NAME", "Librarian"),
       emoji: System.get_env("IAMQ_AGENT_EMOJI", "📚"),
       description: System.get_env("IAMQ_AGENT_DESC", "Document archivist and knowledge organizer — search, summarize, archive"),
@@ -92,18 +104,18 @@ defmodule Librarian.IAMQ do
     # Try HTTP first
     case http_post(state.base_url, "/register", registration) do
       {:ok, _} ->
-        Logger.info("IAMQ: registered via HTTP as #{@agent_id}")
-        schedule(:heartbeat, @heartbeat_interval)
-        schedule(:poll_inbox, @poll_interval)
+        Logger.info("IAMQ: registered via HTTP as #{state.agent_id}")
+        schedule(:heartbeat, state.heartbeat_ms)
+        schedule(:poll_inbox, state.poll_ms)
         {:noreply, %{state | registered: true, mode: :http}}
 
       {:error, http_reason} ->
         # Fall back to file-based queue
         if state.queue_path != "" and File.dir?(state.queue_path) do
-          inbox = Path.join(state.queue_path, @agent_id)
+          inbox = Path.join(state.queue_path, state.agent_id)
           File.mkdir_p!(inbox)
           Logger.info("IAMQ: HTTP unavailable (#{inspect(http_reason)}), using file-based queue at #{state.queue_path}")
-          schedule(:poll_inbox, @poll_interval)
+          schedule(:poll_inbox, state.poll_ms)
           {:noreply, %{state | registered: true, mode: :file}}
         else
           Logger.warning("IAMQ: registration failed — HTTP unreachable, no queue path configured. Retrying in 30s")
@@ -114,12 +126,12 @@ defmodule Librarian.IAMQ do
   end
 
   def handle_info(:heartbeat, state) do
-    case http_post(state.base_url, "/heartbeat", %{agent_id: @agent_id}) do
+    case http_post(state.base_url, "/heartbeat", %{agent_id: state.agent_id}) do
       {:ok, _} -> :ok
       {:error, _} -> :ok
     end
 
-    schedule(:heartbeat, @heartbeat_interval)
+    schedule(:heartbeat, state.heartbeat_ms)
     {:noreply, state}
   end
 
@@ -134,16 +146,18 @@ defmodule Librarian.IAMQ do
       e -> Logger.error("IAMQ: inbox poll failed: #{Exception.message(e)}")
     end
 
-    schedule(:poll_inbox, @poll_interval)
+    schedule(:poll_inbox, state.poll_ms)
     {:noreply, state}
   end
 
   # ── Message building ──
 
   defp build_message(to, subject, body, opts) do
+    agent_id = Application.get_env(:librarian, :iamq_agent_id, "librarian_agent")
+
     %{
       id: uuid4(),
-      from: @agent_id,
+      from: agent_id,
       to: to,
       type: Keyword.get(opts, :type, "info"),
       priority: Keyword.get(opts, :priority, "NORMAL"),
@@ -182,7 +196,8 @@ defmodule Librarian.IAMQ do
       File.mkdir_p!(target_dir)
 
       safe_ts = String.replace(msg.createdAt, ":", "-")
-      filename = "#{safe_ts}-#{@agent_id}.json"
+      agent_id = Application.get_env(:librarian, :iamq_agent_id, "librarian_agent")
+      filename = "#{safe_ts}-#{agent_id}.json"
       path = Path.join(target_dir, filename)
 
       case File.write(path, Jason.encode!(msg, pretty: true)) do
@@ -199,7 +214,7 @@ defmodule Librarian.IAMQ do
   # ── HTTP inbox polling ──
 
   defp poll_inbox_http(state) do
-    case http_get(state.base_url, "/inbox/#{@agent_id}?status=unread") do
+    case http_get(state.base_url, "/inbox/#{state.agent_id}?status=unread") do
       {:ok, %{"messages" => messages}} when is_list(messages) and messages != [] ->
         Logger.info("IAMQ: #{length(messages)} unread message(s) via HTTP")
 
@@ -222,7 +237,7 @@ defmodule Librarian.IAMQ do
   # ── File-based inbox polling ──
 
   defp poll_inbox_file(state) do
-    inbox_dir = Path.join(state.queue_path, @agent_id)
+    inbox_dir = Path.join(state.queue_path, state.agent_id)
     broadcast_dir = Path.join(state.queue_path, "broadcast")
 
     messages =

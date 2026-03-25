@@ -29,8 +29,11 @@ services:
       - ATLASSIAN_2_URL=${ATLASSIAN_2_URL:-}
       - ATLASSIAN_2_EMAIL=${ATLASSIAN_2_EMAIL:-}
       - ATLASSIAN_2_TOKEN=${ATLASSIAN_2_TOKEN:-}
-      - IAMQ_URL=http://host.docker.internal:18790
+      - IAMQ_HTTP_URL=http://host.docker.internal:18790
+      - IAMQ_AGENT_ID=${IAMQ_AGENT_ID:-librarian_agent}
       - IAMQ_QUEUE_PATH=/iamq-queue
+      - IAMQ_HEARTBEAT_MS=${IAMQ_HEARTBEAT_MS:-300000}
+      - IAMQ_POLL_MS=${IAMQ_POLL_MS:-60000}
       - LIBRARIAN_WORKSPACE_PATH=${LIBRARIAN_WORKSPACE_PATH:-}
     healthcheck:
       test: ["CMD", "/app/scripts/healthcheck.sh"]

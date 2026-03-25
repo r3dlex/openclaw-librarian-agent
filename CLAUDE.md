@@ -134,3 +134,5 @@ All configuration is in `.env`. See `.env.example` for the full list with descri
 | `IAMQ_HTTP_URL` | Inter-Agent Message Queue HTTP URL (default: `http://127.0.0.1:18790`) |
 | `IAMQ_AGENT_ID` | Agent ID in the IAMQ registry (default: `librarian_agent`) |
 | `IAMQ_QUEUE_PATH` | Path to IAMQ file-based queue directory (fallback) |
+| `IAMQ_HEARTBEAT_MS` | IAMQ heartbeat interval in ms (default: `300000` = 5 min) |
+| `IAMQ_POLL_MS` | IAMQ inbox poll interval in ms (default: `60000` = 1 min) |

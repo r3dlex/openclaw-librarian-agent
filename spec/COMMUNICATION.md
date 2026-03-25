@@ -4,7 +4,7 @@
 
 ## IAMQ Registration
 
-The agent registers on startup at `$IAMQ_URL` (HTTP) with WebSocket fallback.
+The agent registers on startup at `$IAMQ_HTTP_URL` (HTTP) with file-based fallback via `$IAMQ_QUEUE_PATH`.
 
 ```json
 {

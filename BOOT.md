@@ -10,7 +10,7 @@ On startup, execute the following:
    ```bash
    docker compose logs librarian 2>&1 | grep -i "iamq" | tail -5
    ```
-   If registered, you'll see `IAMQ: registered via HTTP` or `IAMQ: using file-based queue`. If failing, check `IAMQ_URL` and `IAMQ_QUEUE_PATH` in `.env`.
+   If registered, you'll see `IAMQ: registered via HTTP` or `IAMQ: using file-based queue`. If failing, check `IAMQ_HTTP_URL` and `IAMQ_QUEUE_PATH` in `.env`.
 6. **Check IAMQ inbox** for messages received while offline:
    ```bash
    curl -s http://127.0.0.1:18790/inbox/librarian_agent?status=unread
