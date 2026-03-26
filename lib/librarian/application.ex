@@ -14,8 +14,7 @@ defmodule Librarian.Application do
       Librarian.Input,
       Librarian.Reporter,
       Librarian.Archiver,
-      Librarian.IAMQ,
-      Librarian.MqWsClient
+      Librarian.IAMQ
     ]
 
     opts = [strategy: :one_for_one, name: Librarian.Supervisor]

@@ -22,10 +22,10 @@ The agent registers on startup at `$IAMQ_HTTP_URL` (HTTP) with file-based fallba
 
 The Librarian supports two IAMQ transport modes:
 
-1. **HTTP + WebSocket** — Primary. Real-time message push via WebSocket, HTTP for registration and heartbeats.
-2. **File-based fallback** — When the IAMQ service is unreachable, the agent reads from `$IAMQ_QUEUE_PATH/librarian_agent/` on disk.
+1. **HTTP** — Primary. Registration, heartbeats, and inbox polling via the IAMQ HTTP API at `$IAMQ_HTTP_URL`.
+2. **File-based fallback** — When the IAMQ service is unreachable, the agent reads/writes JSON files in `$IAMQ_QUEUE_PATH/librarian_agent/` on disk.
 
-The agent checks HTTP connectivity first. If unavailable, it falls back to scanning the file queue directory on each heartbeat cycle.
+The agent checks HTTP connectivity on startup. If unavailable, it falls back to the file-based queue automatically.
 
 ## Incoming Message Routing
 
