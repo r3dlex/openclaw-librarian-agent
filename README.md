@@ -96,6 +96,35 @@ All configuration is through environment variables in `.env`. See [.env.example]
 | `LIBRARIAN_DB_PATH` | SQLite database path (optional) |
 | `LIBRARIAN_LOG_LEVEL` | Log level: debug, info, warning, error |
 
+## Inter-Agent Message Queue (IAMQ)
+
+The Librarian participates in the Openclaw inter-agent network via the **Inter-Agent Message Queue** (IAMQ). It registers as `librarian_agent` and advertises four capabilities: **search**, **summarize**, **archive**, and **knowledge_management**.
+
+### Dual-mode connectivity
+
+| Mode | Module | Transport | Default URL |
+|------|--------|-----------|-------------|
+| HTTP | `Librarian.IAMQ` | REST polling + file-based fallback | `http://127.0.0.1:18790` |
+| WebSocket | `Librarian.MqWsClient` | Real-time push via WebSockex | `ws://127.0.0.1:18793/ws` |
+
+Both modes run concurrently. The HTTP client (`Librarian.IAMQ`) polls the inbox on a configurable interval and falls back to a **file-based queue** (JSON files per the IAMQ `PROTOCOL.md` spec) when the HTTP service is unreachable. The WebSocket client (`Librarian.MqWsClient`) receives messages instantly, registers on connect, and maintains a periodic heartbeat.
+
+### Cross-agent workflows
+
+- **Receives briefings from `journalist_agent`** — The Journalist sends finished briefings to the Librarian for archival into the Obsidian vault.
+- **Staging health reports** — The `Librarian.StagingWorker` runs hourly to detect orphaned items (status `"filed"` but no `vault_path`), clean up stale pending items, and report staging health via IAMQ.
+
+### Environment variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `IAMQ_HTTP_URL` | `http://127.0.0.1:18790` | IAMQ HTTP API base URL |
+| `IAMQ_WS_URL` | `ws://127.0.0.1:18793/ws` | IAMQ WebSocket URL |
+| `IAMQ_AGENT_ID` | `librarian_agent` | Agent identity in the IAMQ registry |
+| `IAMQ_QUEUE_PATH` | *(none)* | Path to file-based fallback queue directory |
+| `IAMQ_HEARTBEAT_MS` | `300000` (5 min) | HTTP heartbeat interval |
+| `IAMQ_POLL_MS` | `60000` (1 min) | HTTP inbox poll interval |
+
 ## Pipelines
 
 Operational pipelines are defined in `tools/pipeline_runner/` (Python, Poetry). All run inside Docker.
