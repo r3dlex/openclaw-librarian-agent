@@ -8,7 +8,8 @@ defmodule Librarian.MixProject do
       elixir: "~> 1.18",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      aliases: aliases()
+      aliases: aliases(),
+      test_coverage: [summary: [threshold: 5]]
     ]
   end
 
