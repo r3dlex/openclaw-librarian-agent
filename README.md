@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/logo.svg" alt="Librarian Agent logo" width="96" height="96">
+</p>
+
 # Openclaw Librarian Agent
 
 An autonomous document organization agent built on [Openclaw](https://docs.openclaw.ai/). The Librarian ingests, converts, indexes, and organizes documents into a structured [Obsidian](https://obsidian.md/) vault.

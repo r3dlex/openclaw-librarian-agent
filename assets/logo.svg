@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <!-- Open book: two curved pages with a spine -->
+  <path d="M64 28 L64 100" stroke="#8E44AD" stroke-width="4" stroke-linecap="round"/>
+  <!-- Left page -->
+  <path d="M64 28 C50 26, 28 24, 20 28 L20 96 C28 92, 50 94, 64 100" fill="#8E44AD" opacity="0.85"/>
+  <!-- Right page -->
+  <path d="M64 28 C78 26, 100 24, 108 28 L108 96 C100 92, 78 94, 64 100" fill="#8E44AD"/>
+</svg>
