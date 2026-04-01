@@ -1,8 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
-  <!-- Tail -->
-  <polygon points="64,96 54,112 74,112" fill="#E8453C"/>
-  <polygon points="64,108 58,118 70,118" fill="#D63C34"/>
-  <!-- Body -->
+  <!-- Favicon: head + claws only, no accessories -->
+  <!-- Body (head portion) -->
   <ellipse cx="64" cy="72" rx="28" ry="24" fill="#E8453C"/>
   <ellipse cx="64" cy="78" rx="18" ry="14" fill="#F4A39C"/>
   <!-- Claw arms -->
@@ -31,21 +29,4 @@
   <!-- Cheeks -->
   <ellipse cx="48" cy="70" rx="4" ry="2.5" fill="#F4A39C" opacity="0.6"/>
   <ellipse cx="80" cy="70" rx="4" ry="2.5" fill="#F4A39C" opacity="0.6"/>
-  <!-- Glasses -->
-  <circle cx="54" cy="60" r="9" stroke="#8E44AD" stroke-width="1.5" fill="none"/>
-  <circle cx="74" cy="60" r="9" stroke="#8E44AD" stroke-width="1.5" fill="none"/>
-  <line x1="63" y1="60" x2="65" y2="60" stroke="#8E44AD" stroke-width="1.5"/>
-  <line x1="45" y1="59" x2="40" y2="56" stroke="#8E44AD" stroke-width="1.5"/>
-  <line x1="83" y1="59" x2="88" y2="56" stroke="#8E44AD" stroke-width="1.5"/>
-  <!-- Book in right claw -->
-  <g transform="translate(96,34) rotate(15)">
-    <rect x="-9" y="-7" width="9" height="14" rx="1" fill="#8E44AD"/>
-    <rect x="0" y="-7" width="9" height="14" rx="1" fill="#9B59B6"/>
-    <line x1="-7" y1="-3" x2="-2" y2="-3" stroke="white" stroke-width="0.8"/>
-    <line x1="-7" y1="0" x2="-2" y2="0" stroke="white" stroke-width="0.8"/>
-    <line x1="-7" y1="3" x2="-4" y2="3" stroke="white" stroke-width="0.8"/>
-    <line x1="2" y1="-3" x2="7" y2="-3" stroke="white" stroke-width="0.8"/>
-    <line x1="2" y1="0" x2="7" y2="0" stroke="white" stroke-width="0.8"/>
-    <line x1="0" y1="-7" x2="0" y2="7" stroke="#7D3C98" stroke-width="0.8"/>
-  </g>
 </svg>

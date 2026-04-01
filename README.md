@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/logo.svg" alt="Librarian Agent logo" width="96" height="96">
+  <img src="assets/banner.svg" alt="openclaw-librarian-agent" width="600">
 </p>
 
 # Openclaw Librarian Agent

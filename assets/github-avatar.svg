@@ -1,4 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500">
+  <circle cx="250" cy="250" r="230" fill="#8E44AD" opacity="0.12"/>
+  <circle cx="250" cy="250" r="230" fill="none" stroke="#8E44AD" stroke-width="3" opacity="0.3"/>
+  <g transform="translate(70, 70) scale(2.8)">
   <!-- Tail -->
   <polygon points="64,96 54,112 74,112" fill="#E8453C"/>
   <polygon points="64,108 58,118 70,118" fill="#D63C34"/>
@@ -47,5 +50,6 @@
     <line x1="2" y1="-3" x2="7" y2="-3" stroke="white" stroke-width="0.8"/>
     <line x1="2" y1="0" x2="7" y2="0" stroke="white" stroke-width="0.8"/>
     <line x1="0" y1="-7" x2="0" y2="7" stroke="#7D3C98" stroke-width="0.8"/>
+  </g>
   </g>
 </svg>
