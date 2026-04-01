@@ -9,7 +9,21 @@ defmodule Librarian.MixProject do
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       aliases: aliases(),
-      test_coverage: [summary: [threshold: 5]]
+      test_coverage: [
+        summary: [threshold: 80],
+        ignore_modules: [
+          Librarian.Application,
+          Librarian.IAMQ,
+          Librarian.MqWsClient,
+          Librarian.Vault.Watcher,
+          Librarian.Atlassian.Client,
+          Librarian.Input,
+          Librarian.Repo,
+          Librarian.Reporter,
+          Librarian.Archiver,
+          Librarian.StagingWorker
+        ]
+      ]
     ]
   end
 
