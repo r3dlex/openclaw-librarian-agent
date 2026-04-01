@@ -55,6 +55,7 @@ jobs:
   elixir-tests:
     name: Elixir Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: elixir-compile
     steps:
       - uses: actions/checkout@v4
