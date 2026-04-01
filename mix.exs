@@ -21,7 +21,9 @@ defmodule Librarian.MixProject do
           Librarian.Repo,
           Librarian.Reporter,
           Librarian.Archiver,
-          Librarian.StagingWorker
+          Librarian.StagingWorker,
+          # Requires Ecto migration/DB setup — excluded from unit test coverage
+          Librarian.Indexer
         ]
       ]
     ]
