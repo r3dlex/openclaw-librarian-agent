@@ -9,6 +9,16 @@ defmodule Librarian.MixProject do
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       aliases: aliases(),
+      name: "LibrarianAgent",
+      source_url: "https://github.com/r3dlex/openclaw-librarian-agent",
+      docs: [
+        main: "readme",
+        extras:
+          ["README.md"] ++
+            (if File.exists?("spec"), do: Path.wildcard("spec/*.md"), else: []),
+        output: "doc/",
+        formatters: ["html"]
+      ],
       test_coverage: [
         summary: [threshold: 80],
         ignore_modules: [
@@ -44,7 +54,8 @@ defmodule Librarian.MixProject do
       {:jason, "~> 1.4"},
       {:req, "~> 0.5"},
       {:websockex, "~> 0.5"},
-      {:yaml_elixir, "~> 2.11"}
+      {:yaml_elixir, "~> 2.11"},
+      {:ex_doc, "~> 0.34", only: :dev, runtime: false}
     ]
   end
 

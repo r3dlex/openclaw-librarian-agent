@@ -74,6 +74,9 @@ jobs:
       - name: Run tests
         run: mix test
 
+      - name: Generate docs
+        run: mix docs
+
   archgate-check:
     name: ADR Compliance
     runs-on: ubuntu-latest
