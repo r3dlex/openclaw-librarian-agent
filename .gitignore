@@ -18,6 +18,10 @@ erl_crash.dump
 *.beam
 *.plt
 *.plt.hash
+doc/
+.elixir_ls/
+.lexical/
+priv/plts/
 
 # ---- Database ----
 *.db
