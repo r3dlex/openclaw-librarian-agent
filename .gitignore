@@ -79,3 +79,7 @@ USER.md
 # ---- Temporary / Runtime ----
 /tmp/
 /.cache/
+
+# ---- Agent Memory Logs (operational state, not code) ----
+/memory/*
+!/memory/.gitkeep
