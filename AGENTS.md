@@ -186,7 +186,7 @@ Librarian.IAMQ.list_agents()
 
 ### Known agents
 
-Other agents in the network include: `mail_agent`, `journalist_agent`, `archivist_agent`, `gitrepo_agent`, `sysadmin_agent`, `health_fitness_agent`, `workday_agent`, `instagram_agent`, `agent_claude`, `main`. Coordinate with them when tasks cross boundaries.
+Other agents in the network include: `mail_agent`, `journalist_agent`, `gitrepo_agent`, `sysadmin_agent`, `health_fitness_agent`, `workday_agent`, `instagram_agent`, `agent_claude`, `herr_freud_agent`, `main`. Coordinate with them when tasks cross boundaries.
 
 ### Workspace Inbox
 
