@@ -1,0 +1,15 @@
+{
+  "name": "document_archive",
+  "version": 1,
+  "quality_score": 0.5,
+  "description": "Archive a document to the Obsidian vault with metadata",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "title": {"type": "string", "description": "Title of the document"},
+      "content": {"type": "string", "description": "Document content to archive"},
+      "tags": {"type": "array", "items": {"type": "string"}, "description": "Tags for categorization"}
+    },
+    "required": ["title", "content", "tags"]
+  }
+}

@@ -31,7 +31,8 @@ RUN apk add --no-cache \
     curl \
     bash \
     tini \
-    inotify-tools
+    inotify-tools \
+    python3
 
 WORKDIR /app
 

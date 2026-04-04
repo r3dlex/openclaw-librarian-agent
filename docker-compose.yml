@@ -15,6 +15,9 @@ services:
       - ${IAMQ_QUEUE_PATH:-./queue}:/iamq-queue
       # SQLite database persistence
       - librarian-db:/app/priv/data
+      - ../skills-cli:/skills-cli:ro
+      - ../skills:/workspace/skills:rw
+      - ./skills:/agent/skills:rw
     environment:
       - LIBRARIAN_VAULT_PATH=/vault
       - LIBRARIAN_DATA_FOLDER=/data,/project-data
@@ -36,6 +39,7 @@ services:
       - IAMQ_HEARTBEAT_MS=${IAMQ_HEARTBEAT_MS:-300000}
       - IAMQ_POLL_MS=${IAMQ_POLL_MS:-60000}
       - LIBRARIAN_WORKSPACE_PATH=${LIBRARIAN_WORKSPACE_PATH:-}
+      - EMBEDDINGS_URL=http://host.docker.internal:18795
     healthcheck:
       test: ["CMD", "/app/scripts/healthcheck.sh"]
       interval: 30s
